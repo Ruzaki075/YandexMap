@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import YandexMap from "./components/YandexMap";
+import YandexMap from "./components/Map/YandexMap";
 
 function App() {
   return (
