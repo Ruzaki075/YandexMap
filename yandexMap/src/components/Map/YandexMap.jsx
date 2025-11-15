@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { YMaps, Map, Placemark } from "@pbe/react-yandex-maps";
+import MapHeader from "./MapHeader.jsx";
 import "./YandexMap.css";
 
 const YandexMap = () => {
   const [placemarks, setPlacemarks] = useState([]);
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [newPointText, setNewPointText] = useState("");
-
   const [selectedCoords, setSelectedCoords] = useState(null);
 
   const mapDefault = {
@@ -39,9 +39,7 @@ const YandexMap = () => {
   return (
     <div className="map-page">
 
-      <header className="map-header">
-        <h1>Карта проблем города</h1>
-      </header>
+      <MapHeader />
 
       <div className="map-container">
         <YMaps query={{ apikey: "e99fcd77-5ec6-4928-85ff-47ddb2f50012" }}>
@@ -86,6 +84,7 @@ const YandexMap = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

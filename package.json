@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "react-router-dom": "^5.3.4",
     "react-yandex-maps": "^4.6.0"
   }
 }

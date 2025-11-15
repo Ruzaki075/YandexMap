@@ -7,7 +7,6 @@ body, html {
   font-family: 'Inter', sans-serif;
 }
 
-
 .map-page {
   width: 100%;
   height: 100vh;
@@ -24,36 +23,14 @@ body, html {
   100% { background-position: 0% 50%; }
 }
 
-
-.map-header {
-  width: 100%;
-  text-align: center;
-  padding: 20px 0;
-  position: relative;
-  z-index: 10;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
-}
-
-.map-header h1 {
-  font-size: 2rem;
-  color: #ff4d4d;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-weight: 700;
-  text-shadow: 0 0 10px rgba(255, 51, 51, 0.8), 0 0 20px rgba(255, 51, 51, 0.6);
-}
-
-
 .map-container {
   width: 100%;
-  height: calc(100vh - 80px);
-  margin-top: 0;
+  height: calc(100vh - 70px);
+  margin-top: 70px;
   position: relative;
   overflow: hidden;
   border-top: 1px solid rgba(255, 50, 50, 0.2);
 }
-
 
 .add-panel {
   position: absolute;
@@ -103,7 +80,6 @@ body, html {
   box-shadow: 0 0 8px rgba(255, 50, 50, 0.6);
 }
 
-
 .panel-buttons {
   margin-top: 12px;
   display: flex;
@@ -141,13 +117,8 @@ body, html {
   background: #444;
 }
 
-
 @media (max-width: 500px) {
   .add-panel {
     width: 90%;
-  }
-
-  .map-header h1 {
-    font-size: 1.5rem;
   }
 }
