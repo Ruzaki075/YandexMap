@@ -1,11 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import MapHeader from "../Map/MapHeader";
+import { AuthContext } from "../Auth/AuthContext";
 import "./Auth.css";
 
 export default function Login() {
+  const { login } = useContext(AuthContext);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const handleLogin = () => {
+    if (!email.trim()) return;
+    login(email);
+    window.location.href = "/";
+  };
 
   return (
     <>
@@ -35,7 +44,7 @@ export default function Login() {
             />
           </div>
 
-          <button className="auth-btn">Войти</button>
+          <button className="auth-btn" onClick={handleLogin}>Войти</button>
 
           <p className="auth-switch">
             Нет аккаунта?{" "}

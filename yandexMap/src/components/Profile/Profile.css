@@ -1,0 +1,33 @@
+.profile-page {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.profile-box {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 350px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.profile-box h2 {
+  margin-bottom: 20px;
+}
+
+.logout-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px;
+  background: #ff4d4f;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #d9363e;
+}
