@@ -1,12 +1,35 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import MapHeader from "../Map/MapHeader";
+import { register } from "../../services/api";
 import "./Auth.css";
 
 export default function Register() {
+  const history = useHistory();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleRegister = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError("Заполните все поля");
+      return;
+    }
+    
+    if (password !== repeatPassword) {
+      setError("Пароли не совпадают");
+      return;
+    }
+
+    try {
+      await register(email, password);
+      history.push("/login");
+    } catch (err) {
+      setError(err.message || "Ошибка регистрации");
+    }
+  };
 
   return (
     <>
@@ -15,6 +38,8 @@ export default function Register() {
       <div className="auth-page">
         <div className="auth-box">
           <h2 className="auth-title">Регистрация</h2>
+          
+          {error && <div className="auth-error">{error}</div>}
 
           <div className="auth-field">
             <label>Email</label>
@@ -46,7 +71,9 @@ export default function Register() {
             />
           </div>
 
-          <button className="auth-btn">Зарегистрироваться</button>
+          <button className="auth-btn" onClick={handleRegister}>
+            Зарегистрироваться
+          </button>
 
           <p className="auth-switch">
             Уже есть аккаунт?{" "}

@@ -1,34 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { YMaps, Map, Placemark } from "@pbe/react-yandex-maps";
 import MapHeader from "./MapHeader.jsx";
+import { getMarkers, createMarker, uploadImage } from "../../services/api";
 import "./YandexMap.css";
 
 const YandexMap = () => {
   const [placemarks, setPlacemarks] = useState([]);
-
-  // панель добавления
   const [showAddPanel, setShowAddPanel] = useState(false);
-
-  // текст проблемы
   const [newPointText, setNewPointText] = useState("");
-
-  // фото
   const [newPointImage, setNewPointImage] = useState(null);
-
-  // координаты выбранного места
   const [selectedCoords, setSelectedCoords] = useState(null);
-
-  // проверка авторизации
-  const isAuth = !!localStorage.getItem("token");
+  const [loading, setLoading] = useState(true);
 
   const mapDefault = {
     center: [55.751244, 37.618423],
     zoom: 11,
   };
 
-  // клик по карте
+  useEffect(() => {
+    loadMarkers();
+  }, []);
+
+  const loadMarkers = async () => {
+    try {
+      setLoading(true);
+      const data = await getMarkers();
+      setPlacemarks(data.markers || []);
+    } catch (error) {
+      console.error("Error loading markers:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleMapClick = (event) => {
-    if (!isAuth) {
+    const user = localStorage.getItem("user");
+    if (!user) {
       alert("Чтобы добавить проблему — войдите в аккаунт.");
       return;
     }
@@ -38,26 +45,46 @@ const YandexMap = () => {
     setShowAddPanel(true);
   };
 
-  // кнопка "Добавить"
-  const addPoint = () => {
-    if (!newPointText.trim()) return;
+  const addPoint = async () => {
+    if (!newPointText.trim()) {
+      alert("Введите описание проблемы");
+      return;
+    }
 
-    const newPlacemark = {
-      coords: selectedCoords,
-      text: newPointText,
-      image: newPointImage, // картинка
-    };
+    try {
+      let imageUrl = null;
+      
+      if (newPointImage && newPointImage.startsWith('data:')) {
+        const response = await fetch(newPointImage);
+        const blob = await response.blob();
+        const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
+        
+        const uploadResult = await uploadImage(file);
+        imageUrl = uploadResult.image_url;
+      }
 
-    setPlacemarks([...placemarks, newPlacemark]);
+      await createMarker({
+        text: newPointText,
+        latitude: selectedCoords[0],
+        longitude: selectedCoords[1],
+        image_url: imageUrl,
+      });
 
-    // очистка
-    setShowAddPanel(false);
-    setNewPointText("");
-    setSelectedCoords(null);
-    setNewPointImage(null);
+      await loadMarkers();
+      
+      setShowAddPanel(false);
+      setNewPointText("");
+      setSelectedCoords(null);
+      setNewPointImage(null);
+      
+      alert("Маркер успешно добавлен!");
+      
+    } catch (error) {
+      console.error("Error adding point:", error);
+      alert("Ошибка при добавлении маркера: " + error.message);
+    }
   };
 
-  // загрузка фото
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -69,7 +96,6 @@ const YandexMap = () => {
 
   return (
     <div className="map-page">
-
       <MapHeader />
 
       <div className="map-container">
@@ -80,19 +106,20 @@ const YandexMap = () => {
             height="100%"
             onClick={handleMapClick}
           >
-            {placemarks.map((p, index) => (
+            {placemarks.map((p) => (
               <Placemark
-                key={index}
-                geometry={p.coords}
+                key={p.id}
+                geometry={[p.latitude, p.longitude]}
                 properties={{
                   balloonContent: `
                     <div style="max-width:230px">
                       <strong>Проблема:</strong><br>${p.text}
                       ${
-                        p.image
-                          ? `<br><img src="${p.image}" style="width:200px;border-radius:8px;margin-top:10px;" />`
+                        p.image_url
+                          ? `<br><img src="http://localhost:8080${p.image_url}" style="width:200px;border-radius:8px;margin-top:10px;" />`
                           : ""
                       }
+                      <br><small>${new Date(p.created_at).toLocaleDateString()}</small>
                     </div>
                   `,
                   hintContent: p.text,
@@ -104,7 +131,6 @@ const YandexMap = () => {
         </YMaps>
       </div>
 
-      {/* Панель добавления */}
       {showAddPanel && (
         <div className="add-panel">
           <h2>Добавление проблемы</h2>
@@ -139,7 +165,12 @@ const YandexMap = () => {
           </div>
         </div>
       )}
-
+      
+      {loading && (
+        <div className="loading-overlay">
+          <div>Загрузка маркеров...</div>
+        </div>
+      )}
     </div>
   );
 };

@@ -19,20 +19,17 @@ func ConnectDB() {
 		log.Fatal("Failed to open DB:", err)
 	}
 
-	// Настройки пула соединений
 	DB.SetMaxOpenConns(25)
 	DB.SetMaxIdleConns(25)
 	DB.SetConnMaxLifetime(5 * time.Minute)
 
-	// Проверяем соединение
 	if err = DB.Ping(); err != nil {
 		log.Fatal("Failed to ping DB:", err)
 	}
 
-	// Создаем таблицы
 	createTables()
 
-	log.Println("✅ PostgreSQL connected")
+	log.Println("PostgreSQL connected")
 }
 
 func createTables() {
@@ -77,5 +74,5 @@ func createTables() {
 			log.Printf("Error creating table: %v", err)
 		}
 	}
-	log.Println("✅ Tables created/verified")
+	log.Println("Tables created/verified")
 }
