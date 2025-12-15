@@ -19,7 +19,7 @@ export default function Login() {
     }
 
     try {
-      await login(email, password); // <-- вызывает API + сохраняет user
+      await login(email, password); // вызывает API + сохраняет user
       history.push("/");
     } catch (err) {
       setError(err.message || "Ошибка входа");

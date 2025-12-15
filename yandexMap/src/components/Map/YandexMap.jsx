@@ -4,6 +4,21 @@ import MapHeader from "./MapHeader.jsx";
 import { getMarkers, createMarker, uploadImage } from "../../services/api";
 import "./YandexMap.css";
 
+const USER_COLORS = [
+  "islands#redIcon",
+  "islands#blueIcon",
+  "islands#greenIcon",
+  "islands#orangeIcon",
+  "islands#violetIcon",
+  "islands#darkBlueIcon",
+  "islands#pinkIcon",
+];
+
+const getColorByUser = (userId) => {
+  if (!userId) return "islands#grayIcon";
+  return USER_COLORS[userId % USER_COLORS.length];
+};
+
 const YandexMap = () => {
   const [placemarks, setPlacemarks] = useState([]);
   const [showAddPanel, setShowAddPanel] = useState(false);
@@ -25,7 +40,7 @@ const YandexMap = () => {
     try {
       setLoading(true);
       const data = await getMarkers();
-      setPlacemarks(data.markers || []);
+      setPlacemarks(data.markers || data || []);
     } catch (error) {
       console.error("Error loading markers:", error);
     } finally {
@@ -53,12 +68,12 @@ const YandexMap = () => {
 
     try {
       let imageUrl = null;
-      
-      if (newPointImage && newPointImage.startsWith('data:')) {
+
+      if (newPointImage && newPointImage.startsWith("data:")) {
         const response = await fetch(newPointImage);
         const blob = await response.blob();
-        const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
-        
+        const file = new File([blob], "image.jpg", { type: "image/jpeg" });
+
         const uploadResult = await uploadImage(file);
         imageUrl = uploadResult.image_url;
       }
@@ -71,17 +86,16 @@ const YandexMap = () => {
       });
 
       await loadMarkers();
-      
+
       setShowAddPanel(false);
       setNewPointText("");
       setSelectedCoords(null);
       setNewPointImage(null);
-      
+
       alert("Маркер успешно добавлен!");
-      
     } catch (error) {
       console.error("Error adding point:", error);
-      alert("Ошибка при добавлении маркера: " + error.message);
+      alert("Ошибка при добавлении маркера");
     }
   };
 
@@ -113,18 +127,26 @@ const YandexMap = () => {
                 properties={{
                   balloonContent: `
                     <div style="max-width:230px">
-                      <strong>Проблема:</strong><br>${p.text}
+                      <strong>Проблема:</strong><br/>
+                      ${p.text || p.title || ""}
                       ${
                         p.image_url
-                          ? `<br><img src="http://localhost:8080${p.image_url}" style="width:200px;border-radius:8px;margin-top:10px;" />`
+                          ? `<br/>
+                             <img src="http://localhost:8080${p.image_url}"
+                                  style="width:200px;border-radius:8px;margin-top:10px;" />`
                           : ""
                       }
-                      <br><small>${new Date(p.created_at).toLocaleDateString()}</small>
+                      <br/>
+                      <small>Автор: ${p.user_email || "—"}</small><br/>
+                      <small>${new Date(p.created_at).toLocaleDateString()}</small>
                     </div>
                   `,
-                  hintContent: p.text,
+                  hintContent: p.text || p.title,
                 }}
-                options={{ preset: "islands#redIcon", openBalloonOnClick: true }}
+                options={{
+                  preset: getColorByUser(p.user_id),
+                  openBalloonOnClick: true,
+                }}
               />
             ))}
           </Map>
@@ -165,7 +187,7 @@ const YandexMap = () => {
           </div>
         </div>
       )}
-      
+
       {loading && (
         <div className="loading-overlay">
           <div>Загрузка маркеров...</div>

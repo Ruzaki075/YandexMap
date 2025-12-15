@@ -1,32 +1,36 @@
-import React, { useState } from "react";
-import { AuthContext } from "./AuthContext";
-import { login as apiLogin, logout as apiLogout } from "../../services/api";
+import { useState } from "react";
+import { AuthContext } from "./AuthContext"; // Импортируем только контекст
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
-  });
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user"))
+  );
 
   const login = async (email, password) => {
-    const data = await apiLogin(email, password);
-    setUser(data.user);
+    const res = await fetch("http://localhost:8080/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) throw new Error("Login failed");
+
+    const data = await res.json();
+
+    localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
+    setUser(data.user);
   };
 
-const logout = async () => {
-  try {
-    await apiLogout();
-  } catch (err) {
-    console.warn("Logout error:", err);
-  }
-  setUser(null);
-  localStorage.removeItem("user");
-};
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+  };
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};

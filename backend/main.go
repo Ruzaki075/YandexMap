@@ -46,7 +46,7 @@ func main() {
 	}).Methods("OPTIONS")
 
 	port := ":8080"
-	log.Printf("🚀 Server running on http://localhost%s", port)
+	log.Printf(" Server running on http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, r))
 }
 
@@ -335,8 +335,6 @@ func initDB() {
 }
 
 func createTables() {
-	db.Exec(`DROP TABLE IF EXISTS votes CASCADE`)
-	db.Exec(`DROP TABLE IF EXISTS comments CASCADE`)
 	db.Exec(`DROP TABLE IF EXISTS markers CASCADE`)
 	db.Exec(`DROP TABLE IF EXISTS users CASCADE`)
 

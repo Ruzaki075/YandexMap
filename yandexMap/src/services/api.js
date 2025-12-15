@@ -104,4 +104,5 @@ export const logout = async () => {
         console.error('Logout error:', error);
     }
     localStorage.removeItem("user");
-};
+};  
+

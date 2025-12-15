@@ -5,5 +5,4 @@ import (
 )
 
 func SetupRoutes(r *mux.Router) {
-	// Будет реализовано позже
 }

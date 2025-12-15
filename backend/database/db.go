@@ -52,20 +52,6 @@ func createTables() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`,
-		`CREATE TABLE IF NOT EXISTS comments (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER REFERENCES users(id),
-            marker_id INTEGER REFERENCES markers(id) ON DELETE CASCADE,
-            text TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`,
-		`CREATE TABLE IF NOT EXISTS votes (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER REFERENCES users(id),
-            marker_id INTEGER REFERENCES markers(id) ON DELETE CASCADE,
-            type VARCHAR(10) CHECK (type IN ('up', 'down')),
-            UNIQUE(user_id, marker_id)
-        )`,
 	}
 
 	for _, query := range queries {
