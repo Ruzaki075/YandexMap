@@ -1,112 +1,197 @@
 package handlers
 
 import (
-	"backend/database"
+	"database/sql"
 	"encoding/json"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
 	"time"
+
+	"backend/database"
+	"github.com/gorilla/mux"
 )
 
-func GetMarkers(w http.ResponseWriter, r *http.Request) {
+type Marker struct {
+	ID        int       `json:"id"`
+	UserID    int       `json:"user_id"`
+	Text      string    `json:"text"`
+	Latitude  float64   `json:"latitude"`
+	Longitude float64   `json:"longitude"`
+	ImageURL  string    `json:"image_url,omitempty"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	UserEmail string    `json:"user_email,omitempty"`
+}
+
+type CreateMarkerRequest struct {
+	Text      string  `json:"text"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	ImageURL  string  `json:"image_url,omitempty"`
+	UserID    int     `json:"user_id"`
+}
+
+func GetMarkersHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := database.DB.Query(`
-        SELECT m.id, m.user_id, m.title, m.description, 
-               m.latitude, m.longitude, m.category, m.status,
-               m.created_at, m.updated_at, u.email as user_email
-        FROM markers m
-        JOIN users u ON m.user_id = u.id
-        ORDER BY m.created_at DESC
-    `)
+		SELECT m.id, m.user_id, m.text, m.latitude, m.longitude, 
+			   m.image_url, m.status, m.created_at, m.updated_at, u.email
+		FROM markers m
+		LEFT JOIN users u ON m.user_id = u.id
+		ORDER BY m.created_at DESC
+	`)
 	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
+		respondWithError(w, http.StatusInternalServerError, "Database error: "+err.Error())
 		return
 	}
 	defer rows.Close()
 
-	markers := []map[string]interface{}{}
+	markers := []Marker{}
 	for rows.Next() {
-		var m struct {
-			ID          int       `json:"id"`
-			UserID      int       `json:"user_id"`
-			Title       string    `json:"title"`
-			Description string    `json:"description"`
-			Latitude    float64   `json:"latitude"`
-			Longitude   float64   `json:"longitude"`
-			Category    string    `json:"category"`
-			Status      string    `json:"status"`
-			CreatedAt   time.Time `json:"created_at"`
-			UpdatedAt   time.Time `json:"updated_at"`
-			UserEmail   string    `json:"user_email"`
-		}
+		var m Marker
+		var imageURL sql.NullString
+		var userEmail sql.NullString
 
-		err := rows.Scan(&m.ID, &m.UserID, &m.Title, &m.Description,
-			&m.Latitude, &m.Longitude, &m.Category, &m.Status,
-			&m.CreatedAt, &m.UpdatedAt, &m.UserEmail)
+		err := rows.Scan(&m.ID, &m.UserID, &m.Text, &m.Latitude, &m.Longitude,
+			&imageURL, &m.Status, &m.CreatedAt, &m.UpdatedAt, &userEmail)
 		if err != nil {
 			continue
 		}
 
-		var commentCount int
-		database.DB.QueryRow("SELECT COUNT(*) FROM comments WHERE marker_id = $1", m.ID).Scan(&commentCount)
+		if imageURL.Valid {
+			m.ImageURL = imageURL.String
+		}
+		if userEmail.Valid {
+			m.UserEmail = userEmail.String
+		}
 
-		markers = append(markers, map[string]interface{}{
-			"id":            m.ID,
-			"user_id":       m.UserID,
-			"title":         m.Title,
-			"description":   m.Description,
-			"latitude":      m.Latitude,
-			"longitude":     m.Longitude,
-			"category":      m.Category,
-			"status":        m.Status,
-			"created_at":    m.CreatedAt,
-			"updated_at":    m.UpdatedAt,
-			"user_email":    m.UserEmail,
-			"comment_count": commentCount,
-		})
+		markers = append(markers, m)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(markers)
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"markers": markers,
+		"count":   len(markers),
+	})
 }
 
-func CreateMarker(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(int)
-
-	var marker struct {
-		Title       string  `json:"title"`
-		Description string  `json:"description"`
-		Latitude    float64 `json:"latitude"`
-		Longitude   float64 `json:"longitude"`
-		Category    string  `json:"category"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&marker); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+func CreateMarkerHandler(w http.ResponseWriter, r *http.Request) {
+	var req CreateMarkerRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid JSON")
 		return
 	}
 
-	// Валидация
-	if marker.Title == "" || marker.Latitude == 0 || marker.Longitude == 0 {
-		http.Error(w, "Title and coordinates are required", http.StatusBadRequest)
+	if req.Text == "" {
+		respondWithError(w, http.StatusBadRequest, "Text is required")
+		return
+	}
+
+	if req.Latitude == 0 || req.Longitude == 0 {
+		respondWithError(w, http.StatusBadRequest, "Coordinates are required")
+		return
+	}
+
+	var userExists bool
+	err := database.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)", req.UserID).Scan(&userExists)
+	if err != nil || !userExists {
+		respondWithError(w, http.StatusBadRequest, "User not found")
 		return
 	}
 
 	var id int
-	err := database.DB.QueryRow(
-		`INSERT INTO markers (user_id, title, description, latitude, longitude, category)
-         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-		userID, marker.Title, marker.Description, marker.Latitude,
-		marker.Longitude, marker.Category,
+	err = database.DB.QueryRow(
+		`INSERT INTO markers (user_id, text, latitude, longitude, image_url, status)
+		 VALUES ($1, $2, $3, $4, $5, 'pending') RETURNING id`,
+		req.UserID, req.Text, req.Latitude, req.Longitude, req.ImageURL,
 	).Scan(&id)
 
 	if err != nil {
-		http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
+		respondWithError(w, http.StatusInternalServerError, "Database error: "+err.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"id":      id,
-		"success": true,
+	var userEmail string
+	database.DB.QueryRow("SELECT email FROM users WHERE id = $1", req.UserID).Scan(&userEmail)
+
+	respondWithJSON(w, http.StatusCreated, map[string]interface{}{
 		"message": "Marker created successfully",
+		"status":  "success",
+		"marker": map[string]interface{}{
+			"id":         id,
+			"user_id":    req.UserID,
+			"user_email": userEmail,
+			"text":       req.Text,
+		},
 	})
+}
+
+func DeleteMarkerHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	_, err := database.DB.Exec("DELETE FROM markers WHERE id = $1", id)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Database error")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]string{
+		"message": "Marker deleted successfully",
+		"status":  "success",
+	})
+}
+
+func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "File too large (max 10MB)")
+		return
+	}
+
+	file, handler, err := r.FormFile("image")
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "No image file provided")
+		return
+	}
+	defer file.Close()
+
+	if err := os.MkdirAll("uploads", 0755); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to create upload directory")
+		return
+	}
+
+	filename := strconv.FormatInt(time.Now().UnixNano(), 10) + "_" + handler.Filename
+	path := filepath.Join("uploads", filename)
+
+	dst, err := os.Create(path)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to save file")
+		return
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, file); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to save file")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"message":   "Image uploaded successfully",
+		"image_url": "/uploads/" + filename,
+		"status":    "success",
+	})
+}
+
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, _ := json.Marshal(payload)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(response)
+}
+
+func respondWithError(w http.ResponseWriter, code int, message string) {
+	respondWithJSON(w, code, map[string]string{"error": message})
 }

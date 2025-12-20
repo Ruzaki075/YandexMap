@@ -7,11 +7,12 @@ import (
 	"time"
 
 	"backend/database"
+	"backend/middleware"
 )
 
 func Profile(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id")
-	if userID == nil {
+	userID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -35,6 +36,30 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Получаем статистику по маркерам
+	var stats struct {
+		TotalMarkers    int `json:"total_markers"`
+		PendingMarkers  int `json:"pending_markers"`
+		ResolvedMarkers int `json:"resolved_markers"`
+	}
+
+	database.DB.QueryRow(`
+		SELECT 
+			COUNT(*) as total,
+			COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
+			COUNT(CASE WHEN status = 'resolved' THEN 1 END) as resolved
+		FROM markers 
+		WHERE user_id = $1
+	`, userID).Scan(&stats.TotalMarkers, &stats.PendingMarkers, &stats.ResolvedMarkers)
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"id":               user.ID,
+		"email":            user.Email,
+		"created_at":       user.CreatedAt.Format(time.RFC3339),
+		"total_markers":    stats.TotalMarkers,
+		"pending_markers":  stats.PendingMarkers,
+		"resolved_markers": stats.ResolvedMarkers,
+		"status":           "success",
+	})
 }

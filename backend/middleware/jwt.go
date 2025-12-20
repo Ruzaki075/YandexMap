@@ -10,6 +10,16 @@ import (
 
 var jwtKey = []byte("your-secret-key-change-in-production")
 
+type contextKey string
+
+const userIDKey contextKey = "user_id"
+
+type Claims struct {
+	UserID int    `json:"user_id"`
+	Email  string `json:"email"`
+	jwt.StandardClaims
+}
+
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
@@ -26,12 +36,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 
 		tokenStr := parts[1]
 
-		claims := &struct {
-			UserID int    `json:"user_id"`
-			Email  string `json:"email"`
-			jwt.StandardClaims
-		}{}
-
+		claims := &Claims{}
 		token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
 		})
@@ -41,7 +46,12 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "user_id", claims.UserID)
+		ctx := context.WithValue(r.Context(), userIDKey, claims.UserID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func GetUserIDFromContext(ctx context.Context) (int, bool) {
+	userID, ok := ctx.Value(userIDKey).(int)
+	return userID, ok
 }

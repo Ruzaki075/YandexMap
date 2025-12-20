@@ -231,7 +231,6 @@ const YandexMap = () => {
         </YMaps>
       </div>
 
-      
       {selectedMarker && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -243,10 +242,10 @@ const YandexMap = () => {
               <h2>Детали проблемы</h2>
               <div className="user-info">
                 <span className="user-email">
-                  👤 {selectedMarker.user_email || "Анонимный пользователь"}
+                   {selectedMarker.user_email || "Анонимный пользователь"}
                 </span>
                 <span className="problem-date">
-                  📅 {new Date(selectedMarker.created_at).toLocaleDateString('ru-RU', {
+                   {new Date(selectedMarker.created_at).toLocaleDateString('ru-RU', {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric',
@@ -310,7 +309,7 @@ const YandexMap = () => {
               id="image-upload"
             />
             <label htmlFor="image-upload" className="upload-label">
-              📷 Добавить фото (макс. 5MB)
+              Добавить фото (макс. 5MB)
             </label>
           </div>
 

@@ -4,23 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"backend/database"
-	"backend/utils"
-
-	"github.com/golang-jwt/jwt/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtKey = []byte("your-secret-key-change-in-production")
-
-type Claims struct {
-	UserID int    `json:"user_id"`
-	Email  string `json:"email"`
-	jwt.RegisteredClaims
-}
-
-func Register(w http.ResponseWriter, r *http.Request) {
+func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -36,16 +25,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hash, err := utils.HashPassword(req.Password)
-	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
-		return
-	}
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), 14)
 
 	var id int
-	err = database.DB.QueryRow(
+	err := database.DB.QueryRow(
 		"INSERT INTO users(email, password) VALUES($1, $2) RETURNING id",
-		req.Email, hash,
+		req.Email, string(hashedPassword),
 	).Scan(&id)
 
 	if err != nil {
@@ -57,33 +42,18 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expirationTime := time.Now().Add(24 * time.Hour)
-	claims := &Claims{
-		UserID: id,
-		Email:  req.Email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expirationTime),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
-	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"token": tokenString,
+		"message": "User registered successfully",
 		"user": map[string]interface{}{
 			"id":    id,
 			"email": req.Email,
 		},
+		"status": "success",
 	})
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -109,33 +79,26 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !utils.CheckPassword(hashedPassword, req.Password) {
+	if bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password)) != nil {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
-		return
-	}
-
-	expirationTime := time.Now().Add(24 * time.Hour)
-	claims := &Claims{
-		UserID: userID,
-		Email:  req.Email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expirationTime),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
-	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"token": tokenString,
+		"message": "Login successful",
 		"user": map[string]interface{}{
 			"id":    userID,
 			"email": req.Email,
 		},
+		"status": "success",
+	})
+}
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Logged out successfully",
+		"status":  "success",
 	})
 }

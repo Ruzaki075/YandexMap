@@ -7,11 +7,16 @@ import (
 	"time"
 
 	"backend/database"
+	"backend/middleware"
 	"github.com/gorilla/mux"
 )
 
 func CreateComment(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(int)
+	userID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	var comment struct {
 		MarkerID int    `json:"marker_id"`
@@ -47,7 +52,7 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 	).Scan(&id)
 
 	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
+		http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -57,7 +62,8 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 		"user_id":    userID,
 		"marker_id":  comment.MarkerID,
 		"text":       comment.Text,
-		"created_at": time.Now(),
+		"created_at": time.Now().Format(time.RFC3339),
+		"status":     "success",
 	})
 }
 
@@ -78,7 +84,7 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
     `, markerID)
 
 	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
+		http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -104,11 +110,15 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
 			"user_id":    c.UserID,
 			"marker_id":  c.MarkerID,
 			"text":       c.Text,
-			"created_at": c.CreatedAt,
+			"created_at": c.CreatedAt.Format(time.RFC3339),
 			"user_email": c.UserEmail,
 		})
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(comments)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"comments": comments,
+		"count":    len(comments),
+		"status":   "success",
+	})
 }

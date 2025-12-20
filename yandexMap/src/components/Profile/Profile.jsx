@@ -186,7 +186,7 @@ const Profile = () => {
                       <h4>{marker.text.substring(0, 60)}{marker.text.length > 60 ? '...' : ''}</h4>
                       <div className="mark-meta">
                         <span className="mark-date">
-                          📅 {formatDate(marker.created_at)}
+                           {formatDate(marker.created_at)}
                         </span>
                         <span className="mark-coords">
                           📍 {marker.latitude?.toFixed(4)}, {marker.longitude?.toFixed(4)}
