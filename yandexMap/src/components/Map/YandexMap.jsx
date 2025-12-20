@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { YMaps, Map, Placemark } from "@pbe/react-yandex-maps";
 import MapHeader from "./MapHeader.jsx";
-import { getMarkers, createMarker, uploadImage } from "../../services/api";
 import "./YandexMap.css";
 
 const USER_COLORS = [
@@ -26,6 +25,8 @@ const YandexMap = () => {
   const [newPointImage, setNewPointImage] = useState(null);
   const [selectedCoords, setSelectedCoords] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedMarker, setSelectedMarker] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const mapDefault = {
     center: [55.751244, 37.618423],
@@ -39,10 +40,13 @@ const YandexMap = () => {
   const loadMarkers = async () => {
     try {
       setLoading(true);
-      const data = await getMarkers();
+      const response = await fetch("http://localhost:8080/api/markers");
+      if (!response.ok) throw new Error("Failed to load markers");
+      const data = await response.json();
       setPlacemarks(data.markers || data || []);
     } catch (error) {
       console.error("Error loading markers:", error);
+      alert("Ошибка загрузки меток");
     } finally {
       setLoading(false);
     }
@@ -60,6 +64,36 @@ const YandexMap = () => {
     setShowAddPanel(true);
   };
 
+  const handleMarkerClick = (marker) => {
+    setSelectedMarker(marker);
+  };
+
+  const closeModal = () => {
+    setSelectedMarker(null);
+  };
+
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const response = await fetch("http://localhost:8080/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const data = await response.json();
+      return data.image_url;
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error;
+    }
+  };
+
   const addPoint = async () => {
     if (!newPointText.trim()) {
       alert("Введите описание проблемы");
@@ -67,35 +101,68 @@ const YandexMap = () => {
     }
 
     try {
+      setUploading(true);
       let imageUrl = null;
 
-      if (newPointImage && newPointImage.startsWith("data:")) {
-        const response = await fetch(newPointImage);
-        const blob = await response.blob();
-        const file = new File([blob], "image.jpg", { type: "image/jpeg" });
-
-        const uploadResult = await uploadImage(file);
-        imageUrl = uploadResult.image_url;
+      if (newPointImage) {
+        try {
+          const response = await fetch(newPointImage);
+          const blob = await response.blob();
+          const file = new File([blob], "image.jpg", { type: "image/jpeg" });
+          imageUrl = await uploadImage(file);
+        } catch (uploadError) {
+          console.error("Image upload failed:", uploadError);
+          alert("Ошибка загрузки изображения. Метка будет добавлена без фото.");
+        }
       }
 
-      await createMarker({
+      const userStr = localStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : null;
+      
+      if (!user || !user.id) {
+        alert("Ошибка: пользователь не авторизован");
+        return;
+      }
+
+      const markerData = {
         text: newPointText,
         latitude: selectedCoords[0],
         longitude: selectedCoords[1],
         image_url: imageUrl,
+        user_id: user.id, 
+      };
+
+      console.log("Отправляем маркер:", markerData);
+
+      const response = await fetch("http://localhost:8080/api/markers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(markerData),
       });
 
-      await loadMarkers();
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to create marker: ${errorText}`);
+      }
 
+      const result = await response.json();
+      console.log("Маркер создан:", result);
+      
+      await loadMarkers();
+      
       setShowAddPanel(false);
       setNewPointText("");
-      setSelectedCoords(null);
       setNewPointImage(null);
-
-      alert("Маркер успешно добавлен!");
+      setSelectedCoords(null);
+      
+      alert("Метка успешно добавлена!");
     } catch (error) {
       console.error("Error adding point:", error);
-      alert("Ошибка при добавлении маркера");
+      alert("Ошибка при добавлении метки: " + error.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -103,8 +170,18 @@ const YandexMap = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Файл слишком большой. Максимальный размер: 5MB");
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = () => setNewPointImage(reader.result);
+    reader.onload = () => {
+      setNewPointImage(reader.result);
+    };
+    reader.onerror = () => {
+      alert("Ошибка чтения файла");
+    };
     reader.readAsDataURL(file);
   };
 
@@ -126,14 +203,14 @@ const YandexMap = () => {
                 geometry={[p.latitude, p.longitude]}
                 properties={{
                   balloonContent: `
-                    <div style="max-width:230px">
+                    <div style="max-width:250px">
                       <strong>Проблема:</strong><br/>
-                      ${p.text || p.title || ""}
+                      ${p.text || ""}
                       ${
                         p.image_url
                           ? `<br/>
                              <img src="http://localhost:8080${p.image_url}"
-                                  style="width:200px;border-radius:8px;margin-top:10px;" />`
+                                  style="width:100%;border-radius:8px;margin-top:10px;" />`
                           : ""
                       }
                       <br/>
@@ -141,17 +218,78 @@ const YandexMap = () => {
                       <small>${new Date(p.created_at).toLocaleDateString()}</small>
                     </div>
                   `,
-                  hintContent: p.text || p.title,
+                  hintContent: p.text || "Метка",
                 }}
                 options={{
                   preset: getColorByUser(p.user_id),
                   openBalloonOnClick: true,
                 }}
+                onClick={() => handleMarkerClick(p)}
               />
             ))}
           </Map>
         </YMaps>
       </div>
+
+      
+      {selectedMarker && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={closeModal}>
+              ×
+            </button>
+            
+            <div className="modal-header">
+              <h2>Детали проблемы</h2>
+              <div className="user-info">
+                <span className="user-email">
+                  👤 {selectedMarker.user_email || "Анонимный пользователь"}
+                </span>
+                <span className="problem-date">
+                  📅 {new Date(selectedMarker.created_at).toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+            </div>
+
+            <div className="modal-body">
+              <div className="problem-description">
+                <h3>Описание:</h3>
+                <p>{selectedMarker.text || "Без описания"}</p>
+              </div>
+
+              {selectedMarker.image_url && (
+                <div className="problem-image">
+                  <h3>Фотография:</h3>
+                  <img 
+                    src={`http://localhost:8080${selectedMarker.image_url}`}
+                    alt="Фото проблемы"
+                  />
+                </div>
+              )}
+
+              <div className="problem-coordinates">
+                <h3>Координаты:</h3>
+                <p>
+                  Широта: {selectedMarker.latitude?.toFixed(6) || "—"}<br/>
+                  Долгота: {selectedMarker.longitude?.toFixed(6) || "—"}
+                </p>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-close-modal" onClick={closeModal}>
+                Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showAddPanel && (
         <div className="add-panel">
@@ -161,28 +299,50 @@ const YandexMap = () => {
             placeholder="Опишите проблему..."
             value={newPointText}
             onChange={(e) => setNewPointText(e.target.value)}
+            rows={4}
           />
 
-          <input type="file" accept="image/*" onChange={handleImageUpload} />
+          <div className="file-upload">
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleImageUpload}
+              id="image-upload"
+            />
+            <label htmlFor="image-upload" className="upload-label">
+              📷 Добавить фото (макс. 5MB)
+            </label>
+          </div>
 
           {newPointImage && (
-            <img
-              src={newPointImage}
-              alt="preview"
-              style={{
-                width: "100%",
-                marginTop: "10px",
-                borderRadius: "8px",
-              }}
-            />
+            <div className="image-preview">
+              <img
+                src={newPointImage}
+                alt="Предпросмотр"
+              />
+              <button 
+                className="remove-image"
+                onClick={() => setNewPointImage(null)}
+              >
+                ✕ Удалить фото
+              </button>
+            </div>
           )}
 
           <div className="panel-buttons">
-            <button className="btn-cancel" onClick={() => setShowAddPanel(false)}>
+            <button 
+              className="btn-cancel" 
+              onClick={() => setShowAddPanel(false)}
+              disabled={uploading}
+            >
               Отмена
             </button>
-            <button className="btn-add" onClick={addPoint}>
-              Добавить
+            <button 
+              className="btn-add" 
+              onClick={addPoint}
+              disabled={uploading || !newPointText.trim()}
+            >
+              {uploading ? "Добавление..." : "Добавить"}
             </button>
           </div>
         </div>
@@ -190,7 +350,7 @@ const YandexMap = () => {
 
       {loading && (
         <div className="loading-overlay">
-          <div>Загрузка маркеров...</div>
+          <div>Загрузка меток...</div>
         </div>
       )}
     </div>

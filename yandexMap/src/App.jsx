@@ -1,19 +1,20 @@
-import React from "react";
-import { Switch, Route } from "react-router-dom";
-
-import YandexMap from "./components/Map/YandexMap";
-import Login from "./components/Auth/Login";
-import Register from "./components/Auth/Register";
-import Profile from "./components/Profile/Profile";
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
+import YandexMap from './components/Map/YandexMap';
+import Profile from './components/Profile/Profile';
 
 function App() {
   return (
-    <Switch>
-      <Route exact path="/" component={YandexMap} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
-      <Route path="/  " component={Profile} />
-    </Switch>
+    <Router>
+      <Switch>
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+        <Route path="/profile" component={Profile} />
+        <Route path="/" component={YandexMap} />
+      </Switch>
+    </Router>
   );
 }
 

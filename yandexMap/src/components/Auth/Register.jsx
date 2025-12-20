@@ -23,10 +23,33 @@ export default function Register() {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Введите корректный email");
+      return;
+    }
+
+    
+    if (password.length < 6) {
+      setError("Пароль должен быть не менее 6 символов");
+      return;
+    }
+
+    setError(""); 
+    
     try {
-      await register(email, password);
-      history.push("/login");
+      console.log("Пытаемся зарегистрировать:", email);
+      const result = await register(email, password);
+      console.log("Регистрация успешна, результат:", result);
+      
+      if (result && result.status === "success") {
+        alert("Регистрация успешна! Теперь войдите в систему.");
+        history.push("/login");
+      } else {
+        setError("Неизвестная ошибка при регистрации");
+      }
     } catch (err) {
+      console.error("Ошибка регистрации:", err);
       setError(err.message || "Ошибка регистрации");
     }
   };
@@ -48,6 +71,7 @@ export default function Register() {
               placeholder="Введите email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="auth-input"
             />
           </div>
 
@@ -55,9 +79,10 @@ export default function Register() {
             <label>Пароль</label>
             <input
               type="password"
-              placeholder="Введите пароль"
+              placeholder="Введите пароль (минимум 6 символов)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="auth-input"
             />
           </div>
 
@@ -68,6 +93,7 @@ export default function Register() {
               placeholder="Введите пароль ещё раз"
               value={repeatPassword}
               onChange={(e) => setRepeatPassword(e.target.value)}
+              className="auth-input"
             />
           </div>
 

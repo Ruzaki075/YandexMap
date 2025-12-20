@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { AuthContext } from "./AuthContext"; // Импортируем только контекст
+import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user"))
-  );
+  const [user, setUser] = useState(() => {
+    const userStr = localStorage.getItem("user");
+    return userStr ? JSON.parse(userStr) : null;
+  });
 
   const login = async (email, password) => {
     const res = await fetch("http://localhost:8080/api/login", {
@@ -16,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     if (!res.ok) throw new Error("Login failed");
 
     const data = await res.json();
-
+    
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
     setUser(data.user);

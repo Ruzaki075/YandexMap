@@ -28,26 +28,35 @@ func main() {
 
 	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
 
-	r.HandleFunc("/api/register", registerHandler).Methods("POST")
-	r.HandleFunc("/api/login", loginHandler).Methods("POST")
-	r.HandleFunc("/api/logout", logoutHandler).Methods("POST")
-	r.HandleFunc("/api/markers", getMarkersHandler).Methods("GET")
-	r.HandleFunc("/api/markers", createMarkerHandler).Methods("POST")
-	r.HandleFunc("/api/markers/{id}", deleteMarkerHandler).Methods("DELETE")
-	r.HandleFunc("/api/profile", profileHandler).Methods("GET")
-	r.HandleFunc("/api/upload", uploadImageHandler).Methods("POST")
+	r.HandleFunc("/api/register", registerHandler).Methods("POST", "OPTIONS")
+	r.HandleFunc("/api/login", loginHandler).Methods("POST", "OPTIONS")
+	r.HandleFunc("/api/logout", logoutHandler).Methods("POST", "OPTIONS")
+	r.HandleFunc("/api/markers", getMarkersHandler).Methods("GET", "OPTIONS")
+	r.HandleFunc("/api/markers", createMarkerHandler).Methods("POST", "OPTIONS")
+	r.HandleFunc("/api/markers/{id}", deleteMarkerHandler).Methods("DELETE", "OPTIONS")
+	r.HandleFunc("/api/profile", profileHandler).Methods("GET", "OPTIONS")
+	r.HandleFunc("/api/upload", uploadImageHandler).Methods("POST", "OPTIONS")
 
-	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
+	port := ":8080"
+	log.Printf("Server running on http://localhost%s", port)
+	log.Fatal(http.ListenAndServe(port, r))
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Max-Age", "3600")
+
+		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
-		http.NotFound(w, r)
-	}).Methods("OPTIONS")
 
-	port := ":8080"
-	log.Printf(" Server running on http://localhost%s", port)
-	log.Fatal(http.ListenAndServe(port, r))
+		next.ServeHTTP(w, r)
+	})
 }
 
 type RegisterRequest struct {
@@ -78,6 +87,7 @@ type CreateMarkerRequest struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 	ImageURL  string  `json:"image_url,omitempty"`
+	UserID    int     `json:"user_id"`
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +118,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		if err.Error() == "pq: duplicate key value violates unique constraint \"users_email_key\"" {
 			respondWithError(w, http.StatusConflict, "Email already registered")
 		} else {
-			respondWithError(w, http.StatusInternalServerError, "Database error")
+			respondWithError(w, http.StatusInternalServerError, "Database error: "+err.Error())
 		}
 		return
 	}
@@ -231,13 +241,18 @@ func createMarkerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := 1
+	var userExists bool
+	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)", req.UserID).Scan(&userExists)
+	if err != nil || !userExists {
+		respondWithError(w, http.StatusBadRequest, "User not found")
+		return
+	}
 
 	var id int
-	err := db.QueryRow(
+	err = db.QueryRow(
 		`INSERT INTO markers (user_id, text, latitude, longitude, image_url, status)
 		 VALUES ($1, $2, $3, $4, $5, 'pending') RETURNING id`,
-		userID, req.Text, req.Latitude, req.Longitude, req.ImageURL,
+		req.UserID, req.Text, req.Latitude, req.Longitude, req.ImageURL,
 	).Scan(&id)
 
 	if err != nil {
@@ -245,9 +260,18 @@ func createMarkerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var userEmail string
+	db.QueryRow("SELECT email FROM users WHERE id = $1", req.UserID).Scan(&userEmail)
+
 	respondWithJSON(w, http.StatusCreated, map[string]interface{}{
 		"message": "Marker created successfully",
 		"status":  "success",
+		"marker": map[string]interface{}{
+			"id":         id,
+			"user_id":    req.UserID,
+			"user_email": userEmail,
+			"text":       req.Text,
+		},
 	})
 }
 
@@ -277,7 +301,7 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadImageHandler(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(10 << 20)
+	err := r.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "File too large (max 10MB)")
 		return
@@ -365,6 +389,7 @@ func createTables() {
 
 	hashedPassword, _ := hashPassword("admin123")
 	db.Exec("INSERT INTO users (email, password) VALUES ($1, $2)", "admin@test.com", hashedPassword)
+	log.Println("Test user created: admin@test.com / admin123")
 }
 
 func hashPassword(password string) (string, error) {
@@ -386,21 +411,4 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	respondWithJSON(w, code, map[string]string{"error": message})
-}
-
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
 }

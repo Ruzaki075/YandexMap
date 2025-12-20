@@ -18,10 +18,14 @@ export default function Login() {
       return;
     }
 
+    setError(""); 
+
     try {
+      console.log("Пытаемся войти:", email);
       await login(email, password); // вызывает API + сохраняет user
       history.push("/");
     } catch (err) {
+      console.error("Ошибка входа:", err);
       setError(err.message || "Ошибка входа");
     }
   };
@@ -43,6 +47,7 @@ export default function Login() {
               placeholder="Введите email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="auth-input"
             />
           </div>
 
@@ -53,6 +58,7 @@ export default function Login() {
               placeholder="Введите пароль"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="auth-input"
             />
           </div>
 
