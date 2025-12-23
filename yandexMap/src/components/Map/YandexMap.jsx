@@ -43,7 +43,9 @@ const YandexMap = () => {
       const response = await fetch("http://localhost:8080/api/markers");
       if (!response.ok) throw new Error("Failed to load markers");
       const data = await response.json();
-      setPlacemarks(data.markers || data || []);
+
+      // Защита от формата ответа
+      setPlacemarks(Array.isArray(data) ? data : data.markers || []);
     } catch (error) {
       console.error("Error loading markers:", error);
       alert("Ошибка загрузки меток");
@@ -82,10 +84,7 @@ const YandexMap = () => {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to upload image");
-      }
-
+      if (!response.ok) throw new Error("Failed to upload image");
       const data = await response.json();
       return data.image_url;
     } catch (error) {
@@ -118,7 +117,7 @@ const YandexMap = () => {
 
       const userStr = localStorage.getItem("user");
       const user = userStr ? JSON.parse(userStr) : null;
-      
+
       if (!user || !user.id) {
         alert("Ошибка: пользователь не авторизован");
         return;
@@ -129,7 +128,7 @@ const YandexMap = () => {
         latitude: selectedCoords[0],
         longitude: selectedCoords[1],
         image_url: imageUrl,
-        user_id: user.id, 
+        user_id: user.id,
       };
 
       console.log("Отправляем маркер:", markerData);
@@ -149,14 +148,14 @@ const YandexMap = () => {
 
       const result = await response.json();
       console.log("Маркер создан:", result);
-      
+
       await loadMarkers();
-      
+
       setShowAddPanel(false);
       setNewPointText("");
       setNewPointImage(null);
       setSelectedCoords(null);
-      
+
       alert("Метка успешно добавлена!");
     } catch (error) {
       console.error("Error adding point:", error);
@@ -197,60 +196,62 @@ const YandexMap = () => {
             height="100%"
             onClick={handleMapClick}
           >
-            {placemarks.map((p) => (
-              <Placemark
-                key={p.id}
-                geometry={[p.latitude, p.longitude]}
-                properties={{
-                  balloonContent: `
-                    <div style="max-width:250px">
-                      <strong>Проблема:</strong><br/>
-                      ${p.text || ""}
-                      ${
-                        p.image_url
-                          ? `<br/>
-                             <img src="http://localhost:8080${p.image_url}"
-                                  style="width:100%;border-radius:8px;margin-top:10px;" />`
-                          : ""
-                      }
-                      <br/>
-                      <small>Автор: ${p.user_email || "—"}</small><br/>
-                      <small>${new Date(p.created_at).toLocaleDateString()}</small>
-                    </div>
-                  `,
-                  hintContent: p.text || "Метка",
-                }}
-                options={{
-                  preset: getColorByUser(p.user_id),
-                  openBalloonOnClick: true,
-                }}
-                onClick={() => handleMarkerClick(p)}
-              />
-            ))}
+            {Array.isArray(placemarks) &&
+              placemarks.map((p) => (
+                <Placemark
+                  key={p.id}
+                  geometry={[p.latitude, p.longitude]}
+                  properties={{
+                    balloonContent: `
+                      <div style="max-width:250px">
+                        <strong>Проблема:</strong><br/>
+                        ${p.text || ""}
+                        ${
+                          p.image_url
+                            ? `<br/>
+                               <img src="http://localhost:8080${p.image_url}"
+                                    style="width:100%;border-radius:8px;margin-top:10px;" />`
+                            : ""
+                        }
+                        <br/>
+                        <small>Автор: ${p.user_email || "—"}</small><br/>
+                        <small>${new Date(p.created_at).toLocaleDateString()}</small>
+                      </div>
+                    `,
+                    hintContent: p.text || "Метка",
+                  }}
+                  options={{
+                    preset: getColorByUser(p.user_id),
+                    openBalloonOnClick: true,
+                  }}
+                  onClick={() => handleMarkerClick(p)}
+                />
+              ))}
           </Map>
         </YMaps>
       </div>
 
+      {/* Модальное окно выбранной метки */}
       {selectedMarker && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={closeModal}>
               ×
             </button>
-            
+
             <div className="modal-header">
               <h2>Детали проблемы</h2>
               <div className="user-info">
                 <span className="user-email">
-                   {selectedMarker.user_email || "Анонимный пользователь"}
+                  {selectedMarker.user_email || "Анонимный пользователь"}
                 </span>
                 <span className="problem-date">
-                   {new Date(selectedMarker.created_at).toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                  {new Date(selectedMarker.created_at).toLocaleDateString("ru-RU", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </span>
               </div>
@@ -265,7 +266,7 @@ const YandexMap = () => {
               {selectedMarker.image_url && (
                 <div className="problem-image">
                   <h3>Фотография:</h3>
-                  <img 
+                  <img
                     src={`http://localhost:8080${selectedMarker.image_url}`}
                     alt="Фото проблемы"
                   />
@@ -275,7 +276,8 @@ const YandexMap = () => {
               <div className="problem-coordinates">
                 <h3>Координаты:</h3>
                 <p>
-                  Широта: {selectedMarker.latitude?.toFixed(6) || "—"}<br/>
+                  Широта: {selectedMarker.latitude?.toFixed(6) || "—"}
+                  <br />
                   Долгота: {selectedMarker.longitude?.toFixed(6) || "—"}
                 </p>
               </div>
@@ -290,6 +292,7 @@ const YandexMap = () => {
         </div>
       )}
 
+      {/* Панель добавления новой метки */}
       {showAddPanel && (
         <div className="add-panel">
           <h2>Добавление проблемы</h2>
@@ -302,9 +305,9 @@ const YandexMap = () => {
           />
 
           <div className="file-upload">
-            <input 
-              type="file" 
-              accept="image/*" 
+            <input
+              type="file"
+              accept="image/*"
               onChange={handleImageUpload}
               id="image-upload"
             />
@@ -315,11 +318,8 @@ const YandexMap = () => {
 
           {newPointImage && (
             <div className="image-preview">
-              <img
-                src={newPointImage}
-                alt="Предпросмотр"
-              />
-              <button 
+              <img src={newPointImage} alt="Предпросмотр" />
+              <button
                 className="remove-image"
                 onClick={() => setNewPointImage(null)}
               >
@@ -329,15 +329,15 @@ const YandexMap = () => {
           )}
 
           <div className="panel-buttons">
-            <button 
-              className="btn-cancel" 
+            <button
+              className="btn-cancel"
               onClick={() => setShowAddPanel(false)}
               disabled={uploading}
             >
               Отмена
             </button>
-            <button 
-              className="btn-add" 
+            <button
+              className="btn-add"
               onClick={addPoint}
               disabled={uploading || !newPointText.trim()}
             >

@@ -36,7 +36,6 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Получаем статистику по маркерам
 	var stats struct {
 		TotalMarkers    int `json:"total_markers"`
 		PendingMarkers  int `json:"pending_markers"`
