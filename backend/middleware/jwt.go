@@ -8,7 +8,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var jwtKey = []byte("your-secret-key-change-in-production")
+var JwtKey = []byte("your-secret-key-change-in-production")
 
 type contextKey string
 
@@ -38,7 +38,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 
 		claims := &Claims{}
 		token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
+			return JwtKey, nil
 		})
 
 		if err != nil || !token.Valid {
