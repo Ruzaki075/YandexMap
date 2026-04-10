@@ -1,5 +1,39 @@
 const API_URL = "http://localhost:8080/api";
 
+const CLASSIFIER_URL =
+  import.meta.env.VITE_AI_CLASSIFIER_URL ||
+  import.meta.env.VITE_CLASSIFIER_URL ||
+  "http://localhost:5055";
+
+export const classifyProblemText = async (text, topK = 3) => {
+  const response = await fetch(`${CLASSIFIER_URL}/classify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, top_k: topK }),
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Classifier request failed");
+  }
+  return response.json();
+};
+
+/** Классификация по фото: на сервере читается текст с картинки (EasyOCR), затем тот же классификатор. */
+export const classifyProblemImage = async (file, topK = 3) => {
+  const fd = new FormData();
+  fd.append("image", file);
+  fd.append("top_k", String(topK));
+  const response = await fetch(`${CLASSIFIER_URL}/classify_image`, {
+    method: "POST",
+    body: fd,
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || "classify_image failed");
+  }
+  return data;
+};
+
 export const getToken = () => {
   const token = localStorage.getItem("token");
   

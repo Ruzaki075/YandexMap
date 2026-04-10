@@ -1,0 +1,4 @@
+# Всё для классификатора: API + обучение + CLIP по фото + OCR (первый запуск долгий, ~2GB+)
+-r requirements.txt
+-r requirements-vision.txt
+-r requirements-ocr.txt

@@ -1,0 +1,18 @@
+# Runtime / secrets
+backend/uploads/
+.env
+.env.*
+!.env.example
+
+# Python
+classifier/.venv/
+classifier/__pycache__/
+**/__pycache__/
+*.pyc
+
+# Trained model (regenerate with classifier/train.py)
+classifier/model.joblib
+
+# Go build artifacts
+*.exe
+*.exe~

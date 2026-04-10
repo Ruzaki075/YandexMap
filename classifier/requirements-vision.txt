@@ -1,0 +1,6 @@
+# Распознавание типа проблемы по содержимому фото (CLIP, ~500MB+ при первом запуске)
+# pip install -r requirements-vision.txt
+torch>=2.0.0
+transformers>=4.36.0
+pillow>=10.0.0
+safetensors>=0.4.0

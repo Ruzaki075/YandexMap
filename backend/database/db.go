@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"log"
+	"os"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -12,7 +13,12 @@ import (
 var DB *sql.DB
 
 func ConnectDB() {
-	connStr := "host=localhost port=5432 user=postgres password=Chernig007or dbname=yandexmap sslmode=disable"
+	connStr := os.Getenv("DATABASE_URL")
+	autoCreateDB := false
+	if connStr == "" {
+		connStr = "host=localhost port=5432 user=postgres password=Chernig007or dbname=yandexmap sslmode=disable"
+		autoCreateDB = true
+	}
 
 	var err error
 	DB, err = sql.Open("postgres", connStr)
@@ -25,7 +31,17 @@ func ConnectDB() {
 	DB.SetConnMaxLifetime(5 * time.Minute)
 
 	if err = DB.Ping(); err != nil {
-		log.Fatal("Failed to ping DB:", err)
+		if autoCreateDB {
+			admin, e2 := sql.Open("postgres", "host=localhost port=5432 user=postgres password=Chernig007or dbname=postgres sslmode=disable")
+			if e2 == nil {
+				_, _ = admin.Exec("CREATE DATABASE yandexmap")
+				admin.Close()
+			}
+			err = DB.Ping()
+		}
+		if err != nil {
+			log.Fatal("Failed to ping DB:", err)
+		}
 	}
 
 	createTables()
@@ -55,6 +71,10 @@ func createTables() {
 			longitude DECIMAL(11, 8) NOT NULL,
 			image_url TEXT,
 			category VARCHAR(100),
+			domain_key VARCHAR(80),
+			group_key VARCHAR(80),
+			issue_key VARCHAR(80),
+			ai_confidence DOUBLE PRECISION,
 			status VARCHAR(50) DEFAULT 'pending',
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

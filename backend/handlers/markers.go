@@ -49,10 +49,14 @@ func CreateMarkerHandler(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, 201, map[string]interface{}{
 		"status": "success",
 		"marker": map[string]interface{}{
-			"id":         id,
-			"user_id":    req.UserID,
-			"user_email": email,
-			"text":       req.Text,
+			"id":              id,
+			"user_id":         req.UserID,
+			"user_email":      email,
+			"text":            req.Text,
+			"domain_key":      req.DomainKey,
+			"group_key":       req.GroupKey,
+			"issue_key":       req.IssueKey,
+			"ai_confidence":   req.AIConfidence,
 		},
 	})
 }
