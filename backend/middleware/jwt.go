@@ -13,10 +13,12 @@ var JwtKey = []byte("your-secret-key-change-in-production")
 type contextKey string
 
 const userIDKey contextKey = "user_id"
+const isModeratorKey contextKey = "is_moderator"
 
 type Claims struct {
-	UserID int    `json:"user_id"`
-	Email  string `json:"email"`
+	UserID      int    `json:"user_id"`
+	Email       string `json:"email"`
+	IsModerator bool  `json:"is_moderator"`
 	jwt.StandardClaims
 }
 
@@ -47,6 +49,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), userIDKey, claims.UserID)
+		ctx = context.WithValue(ctx, isModeratorKey, claims.IsModerator)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -54,4 +57,9 @@ func JWTMiddleware(next http.Handler) http.Handler {
 func GetUserIDFromContext(ctx context.Context) (int, bool) {
 	userID, ok := ctx.Value(userIDKey).(int)
 	return userID, ok
+}
+
+func GetIsModeratorFromContext(ctx context.Context) bool {
+	v, ok := ctx.Value(isModeratorKey).(bool)
+	return ok && v
 }

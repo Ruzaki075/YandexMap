@@ -57,6 +57,7 @@ func createTables() {
 			id SERIAL PRIMARY KEY,
 			email VARCHAR(255) UNIQUE NOT NULL,
 			password VARCHAR(255) NOT NULL,
+			is_moderator BOOLEAN NOT NULL DEFAULT FALSE,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		)
 	`)
@@ -82,6 +83,6 @@ func createTables() {
 	`)
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("admin123"), 14)
-	DB.Exec("INSERT INTO users (email, password) VALUES ($1, $2)", "admin@test.com", string(hashedPassword))
-	log.Println("Test user created: admin@test.com / admin123")
+	DB.Exec("INSERT INTO users (email, password, is_moderator) VALUES ($1, $2, TRUE)", "admin@test.com", string(hashedPassword))
+	log.Println("Test moderator: admin@test.com / admin123")
 }

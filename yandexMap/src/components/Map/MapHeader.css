@@ -36,6 +36,11 @@
   text-shadow: 0 0 8px rgba(255, 100, 100, 0.7);
 }
 
+.nav-mod {
+  color: #ff6b6b !important;
+  font-weight: 600;
+}
+
 .nav-links {
   display: flex;
   align-items: center;

@@ -10,6 +10,7 @@ type MarkerRepository interface {
 	GetAll() ([]models.Marker, error)
 	Create(req models.CreateMarkerRequest) (int, error)
 	Delete(id int) error
+	UpdateStatus(id int, status string) error
 	GetUserEmail(userID int) (string, error)
 	UserExists(id int) bool
 }
@@ -95,6 +96,14 @@ func (r *PostgresMarkerRepository) Create(req models.CreateMarkerRequest) (int, 
 
 func (r *PostgresMarkerRepository) Delete(id int) error {
 	_, err := database.DB.Exec("DELETE FROM markers WHERE id=$1", id)
+	return err
+}
+
+func (r *PostgresMarkerRepository) UpdateStatus(id int, status string) error {
+	_, err := database.DB.Exec(
+		`UPDATE markers SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+		status, id,
+	)
 	return err
 }
 

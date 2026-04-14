@@ -231,6 +231,13 @@
   margin: 0;
 }
 
+.stat-content p.stat-hint {
+  font-size: 11px;
+  color: #777;
+  margin-top: 6px;
+  line-height: 1.3;
+}
+
 .recent-marks {
   margin-bottom: 40px;
 }
@@ -335,9 +342,43 @@
   color: #ffc107;
 }
 
-.mark-status[data-status="resolved"] {
+.mark-status[data-status="resolved"],
+.mark-status[data-status="approved"] {
   background: rgba(0, 200, 83, 0.1);
   color: #00c853;
+}
+
+.mark-status[data-status="rejected"] {
+  background: rgba(255, 77, 77, 0.15);
+  color: #ff6b6b;
+}
+
+.mark-status-pill {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ccc;
+  border: 1px solid rgba(255, 77, 77, 0.2);
+}
+
+.mark-item[data-status="pending"] .mark-status-pill {
+  color: #ffc107;
+  border-color: rgba(255, 193, 7, 0.35);
+}
+
+.mark-item[data-status="approved"] .mark-status-pill,
+.mark-item[data-status="resolved"] .mark-status-pill {
+  color: #69f0ae;
+  border-color: rgba(0, 200, 83, 0.35);
+}
+
+.mark-item[data-status="rejected"] .mark-status-pill {
+  color: #ff8a80;
+  border-color: rgba(255, 77, 77, 0.35);
 }
 
 .mark-content {

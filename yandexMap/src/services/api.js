@@ -147,6 +147,31 @@ export const getMarkers = async () => {
   }
 };
 
+/** Смена статуса метки (модератор): pending | approved | rejected | resolved */
+export const patchMarkerStatus = async (markerId, status) => {
+  const token = getToken();
+  if (!token) {
+    throw new Error("Требуется авторизация модератора.");
+  }
+  const response = await fetch(`${API_URL}/markers/${markerId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status }),
+  });
+  if (response.status === 401 || response.status === 403) {
+    const t = await response.text();
+    throw new Error(t || "Нет прав модератора или сессия истекла");
+  }
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Не удалось обновить статус");
+  }
+  return response.json();
+};
+
 export const createMarker = async (markerData) => {
   try {
     const token = getToken();

@@ -49,8 +49,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message": "User registered successfully",
 		"user": map[string]interface{}{
-			"id":    id,
-			"email": req.Email,
+			"id":            id,
+			"email":         req.Email,
+			"is_moderator": false,
 		},
 		"status": "success",
 	})
@@ -69,10 +70,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	var userID int
 	var hashedPassword string
+	var isModerator bool
 	err := database.DB.QueryRow(
-		"SELECT id, password FROM users WHERE email = $1",
+		"SELECT id, password, COALESCE(is_moderator, FALSE) FROM users WHERE email = $1",
 		req.Email,
-	).Scan(&userID, &hashedPassword)
+	).Scan(&userID, &hashedPassword, &isModerator)
 
 	if err == sql.ErrNoRows {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
@@ -89,8 +91,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &middleware.Claims{
-		UserID: userID,
-		Email:  req.Email,
+		UserID:      userID,
+		Email:       req.Email,
+		IsModerator: isModerator,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -109,8 +112,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Login successful",
 		"token":   tokenString,
 		"user": map[string]interface{}{
-			"id":    userID,
-			"email": req.Email,
+			"id":            userID,
+			"email":         req.Email,
+			"is_moderator": isModerator,
 		},
 		"status": "success",
 	})

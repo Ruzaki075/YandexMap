@@ -4,6 +4,7 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import YandexMap from './components/Map/YandexMap';
 import Profile from './components/Profile/Profile';
+import Moderation from './components/Moderation/Moderation';
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Switch>
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/moderation" component={Moderation} />
         <Route path="/profile" component={Profile} />
         <Route path="/" component={YandexMap} />
       </Switch>

@@ -25,6 +25,11 @@ export default function MapHeader() {
           ) : (
             <>
               <Link to="/">Карта</Link>
+              {user?.is_moderator && (
+                <Link to="/moderation" className="nav-mod">
+                  Модерация
+                </Link>
+              )}
               <Link to="/profile">Профиль</Link>
 
               <button

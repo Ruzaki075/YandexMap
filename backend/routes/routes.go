@@ -2,6 +2,7 @@ package routes
 
 import (
 	"backend/handlers"
+	"backend/middleware"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -18,6 +19,7 @@ func SetupRoutes(r *mux.Router) {
 	r.HandleFunc("/api/markers", handlers.GetMarkersHandler).Methods("GET", "OPTIONS")
 	r.HandleFunc("/api/markers", handlers.CreateMarkerHandler).Methods("POST", "OPTIONS")
 	r.HandleFunc("/api/markers/{id}", handlers.DeleteMarkerHandler).Methods("DELETE", "OPTIONS")
+	r.Handle("/api/markers/{id}/status", middleware.JWTMiddleware(http.HandlerFunc(handlers.UpdateMarkerStatusHandler))).Methods("PATCH", "OPTIONS")
 	r.HandleFunc("/api/upload", handlers.UploadImageHandler).Methods("POST", "OPTIONS")
 }
 

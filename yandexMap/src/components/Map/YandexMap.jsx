@@ -47,6 +47,21 @@ function buildMarkerBalloonHtml(p, taxonomy) {
     '<div style="box-sizing:border-box;font-family:system-ui,-apple-system,\'Segoe UI\',Roboto,sans-serif;max-width:300px;padding:2px 4px 6px;color:#111827;">',
   ];
 
+  const st = p.status || "pending";
+  if (st === "pending") {
+    chunks.push(
+      '<div style="font-size:11px;font-weight:600;color:#c2410c;margin:0 0 8px;">На модерации</div>'
+    );
+  } else if (st === "approved") {
+    chunks.push(
+      '<div style="font-size:11px;font-weight:600;color:#047857;margin:0 0 8px;">Одобрено · на карте</div>'
+    );
+  } else if (st === "resolved") {
+    chunks.push(
+      '<div style="font-size:11px;font-weight:600;color:#1d4ed8;margin:0 0 8px;">Отмечено как решено</div>'
+    );
+  }
+
   if (p.image_url) {
     const src = `${API_ORIGIN}${p.image_url}`;
     chunks.push(
@@ -271,8 +286,9 @@ const YandexMap = () => {
       if (!response.ok) throw new Error("Failed to load markers");
       const data = await response.json();
 
-      // Защита от формата ответа
-      setPlacemarks(Array.isArray(data) ? data : data.markers || []);
+      // Защита от формата ответа; на карте не показываем отклонённые модератором
+      const raw = Array.isArray(data) ? data : data.markers || [];
+      setPlacemarks(raw.filter((m) => (m.status || "pending") !== "rejected"));
     } catch (error) {
       console.error("Error loading markers:", error);
       alert("Ошибка загрузки меток");

@@ -3,6 +3,21 @@ import { useHistory, Link } from "react-router-dom";
 import MapHeader from "../Map/MapHeader.jsx";
 import "./Profile.css";
 
+/** Одобрено модератором или отмечено решённым — в профиле считаем «обработано». */
+function isResolvedLike(status) {
+  const s = status || "pending";
+  return s === "resolved" || s === "approved";
+}
+
+function statusLabel(status) {
+  const s = status || "pending";
+  if (s === "pending") return "На проверке";
+  if (s === "approved") return "Одобрено";
+  if (s === "rejected") return "Отклонено";
+  if (s === "resolved") return "Решено";
+  return s;
+}
+
 const Profile = () => {
   const history = useHistory();
   const [user, setUser] = useState(null);
@@ -32,13 +47,13 @@ const Profile = () => {
         setUserMarkers(markers);
 
         const total = markers.length;
-        const pending = markers.filter(m => m.status === 'pending').length;
-        const resolved = markers.filter(m => m.status === 'resolved').length;
+        const pending = markers.filter((m) => (m.status || "pending") === "pending").length;
+        const resolved = markers.filter((m) => isResolvedLike(m.status)).length;
 
         setStats({
           totalMarkers: total,
           pendingMarkers: pending,
-          resolvedMarkers: resolved
+          resolvedMarkers: resolved,
         });
       }
     } catch (error) {
@@ -103,7 +118,9 @@ const Profile = () => {
             
             <div className="profile-info">
               <h1 className="profile-name">{user.email}</h1>
-              <p className="profile-role">Активный пользователь</p>
+              <p className="profile-role">
+                {Boolean(user.is_moderator) ? "Модератор" : "Активный пользователь"}
+              </p>
               <p className="profile-join-date">
                 Зарегистрирован {formatDate(user.created_at || new Date())}
               </p>
@@ -155,7 +172,8 @@ const Profile = () => {
               </div>
               <div className="stat-content">
                 <h3>{stats.resolvedMarkers}</h3>
-                <p>Решено проблем</p>
+                <p>Принято / решено</p>
+                <p className="stat-hint">вкл. одобренные модератором</p>
               </div>
             </div>
           </div>
@@ -177,13 +195,22 @@ const Profile = () => {
               </div>
             ) : (
               <div className="marks-list">
-                {userMarkers.slice(0, 5).map(marker => (
-                  <div key={marker.id} className="mark-item">
-                    <div className="mark-status" data-status={marker.status}>
-                      {marker.status === 'pending' ? '⏳' : '✅'}
+                {userMarkers.slice(0, 5).map(marker => {
+                  const st = marker.status || "pending";
+                  const icon =
+                    st === "pending"
+                      ? "⏳"
+                      : st === "rejected"
+                        ? "⛔"
+                        : "✅";
+                  return (
+                  <div key={marker.id} className="mark-item" data-status={st}>
+                    <div className="mark-status" data-status={st}>
+                      {icon}
                     </div>
                     <div className="mark-content">
                       <h4>{marker.text.substring(0, 60)}{marker.text.length > 60 ? '...' : ''}</h4>
+                      <span className="mark-status-pill">{statusLabel(st)}</span>
                       <div className="mark-meta">
                         <span className="mark-date">
                            {formatDate(marker.created_at)}
@@ -202,7 +229,8 @@ const Profile = () => {
                       </button>
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             )}
           </div>

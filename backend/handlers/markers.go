@@ -7,8 +7,10 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
+	"backend/middleware"
 	"backend/models"
 	"backend/repositories"
 	"github.com/gorilla/mux"
@@ -69,6 +71,44 @@ func DeleteMarkerHandler(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, 200, map[string]string{
 		"status":  "success",
 		"message": "Marker deleted",
+	})
+}
+
+// UpdateMarkerStatusHandler — смена статуса метки (модерация). Только is_moderator в JWT.
+func UpdateMarkerStatusHandler(w http.ResponseWriter, r *http.Request) {
+	if !middleware.GetIsModeratorFromContext(r.Context()) {
+		respondWithError(w, http.StatusForbidden, "Moderator only")
+		return
+	}
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil || id <= 0 {
+		respondWithError(w, http.StatusBadRequest, "Invalid marker id")
+		return
+	}
+	var body struct {
+		Status string `json:"status"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid JSON")
+		return
+	}
+	status := strings.ToLower(strings.TrimSpace(body.Status))
+	allowed := map[string]bool{
+		"pending": true, "approved": true, "rejected": true, "resolved": true,
+	}
+	if !allowed[status] {
+		respondWithError(w, http.StatusBadRequest, "Invalid status: use pending, approved, rejected, resolved")
+		return
+	}
+	repo := repositories.NewMarkerRepository()
+	if err := repo.UpdateStatus(id, status); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Database error")
+		return
+	}
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"status":        "success",
+		"id":            id,
+		"marker_status": status,
 	})
 }
 
