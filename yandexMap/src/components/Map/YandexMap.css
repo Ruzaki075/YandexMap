@@ -10,17 +10,8 @@ body, html {
 .map-page {
   width: 100%;
   height: 100vh;
-  background: linear-gradient(135deg, #1a1a1a, #4b0000, #1a1a1a);
-  background-size: 200% 200%;
-  animation: bgMove 15s ease infinite;
   display: flex;
   flex-direction: column;
-}
-
-@keyframes bgMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 .map-container {
@@ -29,7 +20,6 @@ body, html {
   margin-top: 70px;
   position: relative;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 50, 50, 0.2);
 }
 
 .panel-taxonomy {
@@ -49,7 +39,7 @@ body, html {
   width: 100%;
   padding: 8px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 77, 77, 0.5);
+  border: 1px solid rgba(255, 138, 128, 0.5);
   background: #141414;
   color: #fff;
   font-size: 0.9rem;
@@ -71,7 +61,7 @@ body, html {
   font-weight: 600;
   color: #ffb3b3;
   background: rgba(25, 18, 18, 0.95);
-  border: 1px solid rgba(255, 77, 77, 0.5);
+  border: 1px solid rgba(255, 138, 128, 0.5);
   border-radius: 10px;
   cursor: pointer;
   transition: 0.2s ease;
@@ -80,9 +70,9 @@ body, html {
 
 .btn-ai-suggest:hover:not(:disabled) {
   color: #fff;
-  background: rgba(255, 60, 60, 0.18);
+  background: rgba(255, 138, 128, 0.18);
   border-color: #ff4d4d;
-  box-shadow: 0 0 14px rgba(255, 60, 60, 0.25);
+  box-shadow: 0 0 14px rgba(255, 138, 128, 0.25);
 }
 
 .btn-ai-suggest:disabled {
@@ -106,7 +96,7 @@ body, html {
     rgba(28, 18, 18, 0.96) 50%,
     rgba(22, 16, 16, 0.98) 100%
   );
-  border: 1px solid rgba(255, 77, 77, 0.45);
+  border: 1px solid rgba(255, 138, 128, 0.45);
   box-shadow: 0 0 16px rgba(255, 40, 40, 0.12);
   min-height: 4.5rem;
 }
@@ -167,10 +157,10 @@ body, html {
   background: rgba(30, 30, 30, 0.95);
   padding: 20px;
   border-radius: 14px;
-  box-shadow: 0 0 20px rgba(255, 60, 60, 0.4);
+  box-shadow: 0 0 20px rgba(255, 138, 128, 0.4);
   backdrop-filter: blur(5px);
   z-index: 50;
-  border: 1px solid rgba(255, 60, 60, 0.4);
+  border: 1px solid rgba(255, 138, 128, 0.4);
   animation: panelFade 0.3s ease;
 }
 
@@ -232,7 +222,7 @@ body, html {
 
 .btn-add:hover {
   background: #ff1f1f;
-  box-shadow: 0 0 14px rgba(255, 60, 60, 0.8);
+  box-shadow: 0 0 14px rgba(255, 138, 128, 0.8);
 }
 
 .btn-cancel {
@@ -288,7 +278,7 @@ body, html {
   box-shadow:
     0 24px 64px rgba(0, 0, 0, 0.55),
     0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 0 40px rgba(255, 60, 60, 0.12);
+    0 0 40px rgba(255, 138, 128, 0.12);
   animation: slideUp 0.3s ease;
 }
 
@@ -323,7 +313,7 @@ body, html {
 }
 
 .modal-close:hover {
-  background: rgba(255, 60, 60, 0.25);
+  background: rgba(255, 138, 128, 0.25);
   border-color: rgba(255, 120, 120, 0.5);
   color: #fff;
   transform: scale(1.05);
@@ -380,7 +370,7 @@ body, html {
 .modal-hero {
   margin: 0;
   padding: 0 20px;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 60, 60, 0.08), transparent 70%),
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 138, 128, 0.08), transparent 70%),
     #0a0a0b;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -480,7 +470,7 @@ body, html {
 
 .modal-header {
   margin-bottom: 25px;
-  border-bottom: 1px solid rgba(255, 60, 60, 0.2);
+  border-bottom: 1px solid rgba(255, 138, 128, 0.2);
   padding-bottom: 15px;
 }
 
@@ -500,7 +490,7 @@ body, html {
 .user-email {
   color: #fff;
   font-size: 16px;
-  background: rgba(255, 60, 60, 0.1);
+  background: rgba(255, 138, 128, 0.1);
   padding: 8px 12px;
   border-radius: 8px;
   display: inline-block;
@@ -558,7 +548,7 @@ body, html {
   height: auto;
   object-fit: contain;
   border-radius: 12px;
-  border: 2px solid rgba(255, 60, 60, 0.3);
+  border: 2px solid rgba(255, 138, 128, 0.3);
   margin-top: 0;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
@@ -591,18 +581,18 @@ body, html {
 
 .btn-close-modal:hover {
   background: #ff1f1f;
-  box-shadow: 0 0 20px rgba(255, 60, 60, 0.6);
+  box-shadow: 0 0 20px rgba(255, 138, 128, 0.6);
   transform: translateY(-2px);
 }
 
 .current-user-info {
-  background: rgba(255, 60, 60, 0.1);
+  background: rgba(255, 138, 128, 0.1);
   padding: 10px;
   border-radius: 8px;
   margin-bottom: 15px;
   text-align: center;
   color: #ff9999;
-  border: 1px solid rgba(255, 60, 60, 0.3);
+  border: 1px solid rgba(255, 138, 128, 0.3);
 }
 
 @media (max-width: 600px) {
@@ -651,7 +641,7 @@ body, html {
 
 .upload-label {
   display: block;
-  background: rgba(255, 77, 77, 0.1);
+  background: rgba(255, 138, 128, 0.1);
   color: #ff4d4d;
   padding: 12px;
   border-radius: 10px;
@@ -663,7 +653,7 @@ body, html {
 }
 
 .upload-label:hover {
-  background: rgba(255, 77, 77, 0.2);
+  background: rgba(255, 138, 128, 0.2);
   border-color: #ff1a1a;
 }
 
@@ -687,8 +677,8 @@ body, html {
   height: auto;
   object-fit: contain;
   border-radius: 10px;
-  border: 2px solid rgba(255, 77, 77, 0.3);
-  box-shadow: 0 0 10px rgba(255, 60, 60, 0.2);
+  border: 2px solid rgba(255, 138, 128, 0.3);
+  box-shadow: 0 0 10px rgba(255, 138, 128, 0.2);
 }
 
 .remove-image {
@@ -742,4 +732,185 @@ body, html {
   font-size: 20px;
   font-weight: bold;
   text-shadow: 0 0 10px rgba(255, 50, 50, 0.8);
+}
+
+.modal-reviews-section {
+  border-top: 1px solid rgba(255, 138, 128, 0.12);
+  padding-top: 4px;
+}
+
+.modal-reviews-muted {
+  color: #9ca3af;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.modal-reviews-muted a,
+.modal-reviews-muted a:visited {
+  color: #ff8a80;
+  font-weight: 600;
+}
+
+.modal-reviews-err {
+  color: #fca5a5;
+  font-size: 14px;
+}
+
+.modal-reviews-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.modal-reviews-stars {
+  color: #fbbf24;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+.modal-reviews-stars-muted {
+  color: rgba(251, 191, 36, 0.28);
+}
+
+.modal-reviews-num {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.modal-reviews-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #ff8a80;
+  margin: 10px 0 6px;
+}
+
+.modal-review-form {
+  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 138, 128, 0.2);
+}
+
+.modal-star-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.modal-star-btn {
+  background: transparent;
+  border: none;
+  color: rgba(251, 191, 36, 0.25);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.modal-star-btn:hover {
+  color: rgba(251, 191, 36, 0.55);
+  transform: scale(1.08);
+}
+
+.modal-star-btn--on {
+  color: #fbbf24;
+}
+
+.modal-review-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(20, 20, 20, 0.9);
+  color: #f3f4f6;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+.modal-review-submit {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #ff4d4d, #c62828);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(255, 138, 128, 0.25);
+}
+
+.modal-review-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.modal-reviews-hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.modal-reviews-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.modal-review-item {
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-review-item:first-child {
+  border-top: none;
+  padding-top: 4px;
+}
+
+.modal-review-item-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.modal-review-email {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fecaca;
+}
+
+.modal-review-item-stars {
+  font-size: 14px;
+  color: #fbbf24;
+  letter-spacing: 0.5px;
+}
+
+.modal-review-item-text {
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #d1d5db;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.modal-review-time {
+  font-size: 12px;
+  color: #6b7280;
 }

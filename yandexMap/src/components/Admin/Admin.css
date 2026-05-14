@@ -1,0 +1,80 @@
+/* Тот же фон и карточки, что у Profile / Moderation */
+
+.admin-container {
+  max-width: 900px;
+}
+
+.admin-intro {
+  margin-bottom: 20px;
+}
+
+.admin-user-list {
+  margin-top: 8px;
+}
+
+.admin-user-row {
+  align-items: stretch;
+}
+
+.admin-user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #ffd54f, #ff8f00);
+  border-radius: 12px;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.admin-email {
+  font-weight: 600;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.admin-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 6px;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-badge--gold {
+  background: rgba(255, 213, 79, 0.2);
+  border: 1px solid rgba(255, 213, 79, 0.45);
+  color: #ffe082;
+}
+
+.admin-badge--mod {
+  background: rgba(255, 107, 107, 0.15);
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  color: #ff8a80;
+}
+
+.admin-badge--user {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #bbb;
+}
+
+.admin-meta-muted {
+  font-size: 13px;
+  color: #888;
+  margin-left: 4px;
+}
+
+.admin-actions {
+  margin-top: 12px;
+}

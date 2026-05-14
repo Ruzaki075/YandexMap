@@ -1,31 +1,29 @@
 .auth-page {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #0e0e0e;
+  padding: 24px;
+  box-sizing: border-box;
 }
 
 .auth-box {
-  width: 380px;
+  width: 100%;
+  max-width: 380px;
   padding: 40px;
-  border-radius: 12px;
-
-  background: #1b1b1b;
-  border: 1px solid #2a2a2a;
-
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  box-shadow: 0 0 20px rgba(255, 77, 77, 0.1);
+  box-sizing: border-box;
 }
 
 .auth-title {
   margin: 0;
-  font-size: 28px;
+  font-size: 26px;
   text-align: center;
-  color: #ff4d4d;
-  font-weight: 700;
+  color: #fff;
+  font-weight: 600;
 }
 
 .auth-field {
@@ -41,68 +39,54 @@
 
 .auth-field input {
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #333;
   background: #121212;
   color: white;
   outline: none;
-  transition: 0.2s;
+  transition: border-color 0.15s ease;
+  font-size: 15px;
 }
 
 .auth-field input:focus {
-  border-color: #ff4d4d;
+  border-color: rgba(255, 138, 128, 0.55);
 }
 
 .auth-btn {
   padding: 14px;
   border: none;
-  border-radius: 8px;
-  background: #ff4d4d;
+  border-radius: 10px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 138, 128, 0.95),
+    rgba(192, 72, 130, 0.92)
+  );
   color: white;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
+  transition: filter 0.15s ease;
+  font-family: inherit;
 }
 
 .auth-btn:hover {
-  background: #ff2f2f;
+  filter: brightness(1.06);
 }
 
-.auth-switch{
-    color: #fff;
+.auth-switch {
+  color: rgba(230, 235, 245, 0.88);
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
 }
+
 .auth-link {
-  color: #ff4d4d;
+  color: #ff8a80;
   font-weight: 600;
   text-decoration: none;
-  transition: 0.2s;
+  transition: color 0.15s ease;
 }
 
 .auth-link:hover {
-  color: white;
-}
-.auth-page {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  background:
-    linear-gradient(rgba(255, 60, 60, 0.12), rgba(0,0,0,0.35)),
-    repeating-linear-gradient(
-      0deg,
-      rgba(255, 0, 0, 0.08) 0px,
-      rgba(255, 0, 0, 0.08) 1px,
-      transparent 1px,
-      transparent 40px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 0, 0, 0.08) 0px,
-      rgba(255, 0, 0, 0.08) 1px,
-      transparent 1px,
-      transparent 40px
-    ),
-    #0a0a0a;
+  color: #fff;
 }

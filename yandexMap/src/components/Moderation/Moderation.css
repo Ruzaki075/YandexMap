@@ -1,4 +1,23 @@
-/* Дополнения к profile-page / profile-container — тот же тёмно-красный стиль */
+/* Модерация: только компоненты страницы; фон и стекло — src/styles/app-theme.css (.page-aurora) */
+
+.mod-page-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: none;
+}
+
+.mod-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 0;
+}
 
 .mod-container {
   padding-top: 32px;
@@ -18,20 +37,25 @@
 }
 
 .mod-refresh {
-  background: rgba(255, 77, 77, 0.12);
-  color: #ff9999;
-  border: 1px solid rgba(255, 77, 77, 0.35);
-  border-radius: 10px;
-  padding: 8px 16px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.88);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
+  font-family: inherit;
+  transition: color 0.15s ease, opacity 0.15s ease;
 }
 
 .mod-refresh:hover:not(:disabled) {
-  background: rgba(255, 77, 77, 0.22);
-  color: #fff;
+  color: #ff8a80;
+}
+
+.page-aurora .mod-refresh:focus-visible {
+  outline: 2px solid rgba(255, 138, 128, 0.55);
+  outline-offset: 2px;
 }
 
 .mod-refresh:disabled {
@@ -69,11 +93,11 @@
   gap: 12px 20px;
   margin-bottom: 24px;
   padding: 14px 18px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 14px;
-  border: 1px solid rgba(255, 77, 77, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 14px;
-  color: #bbb;
+  color: #a8adb8;
 }
 
 .mod-breakdown-item strong {
@@ -98,7 +122,7 @@
 }
 
 .mod-intro {
-  color: #aaa;
+  color: rgba(200, 206, 220, 0.88);
   font-size: 14px;
   line-height: 1.55;
   margin: 0 0 24px;
@@ -116,28 +140,29 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid rgba(255, 77, 77, 0.25);
-  background: rgba(255, 255, 255, 0.05);
-  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(230, 235, 245, 0.88);
   border-radius: 999px;
-  padding: 10px 16px;
+  padding: 9px 15px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
+  font-family: inherit;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
 
 .mod-chip:hover {
-  border-color: rgba(255, 77, 77, 0.5);
-  background: rgba(255, 77, 77, 0.08);
+  border-color: rgba(255, 138, 128, 0.45);
+  background: rgba(255, 255, 255, 0.04);
   color: #fff;
 }
 
 .mod-chip--active {
-  border-color: #ff4d4d;
-  background: rgba(255, 77, 77, 0.18);
+  border-color: rgba(255, 138, 128, 0.65);
+  background: rgba(255, 138, 128, 0.08);
   color: #fff;
-  box-shadow: 0 0 16px rgba(255, 77, 77, 0.25);
+  box-shadow: none;
 }
 
 .mod-chip-count {
@@ -145,12 +170,12 @@
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.35);
-  color: #ff9999;
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 183, 180, 0.95);
 }
 
 .mod-chip--active .mod-chip-count {
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.35);
   color: #fff;
 }
 
@@ -216,27 +241,28 @@
   font-weight: 700;
   padding: 4px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 77, 77, 0.35);
-  color: #ffc9c9;
-  background: rgba(255, 77, 77, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 230, 230, 0.95);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .mod-review[data-status="pending"] .mod-review-badge {
-  color: #ffc107;
-  border-color: rgba(255, 193, 7, 0.4);
-  background: rgba(255, 193, 7, 0.08);
+  color: #ffd54f;
+  border-color: rgba(255, 213, 79, 0.4);
+  background: rgba(255, 213, 79, 0.06);
 }
 
 .mod-review[data-status="approved"] .mod-review-badge,
 .mod-review[data-status="resolved"] .mod-review-badge {
   color: #69f0ae;
-  border-color: rgba(0, 200, 83, 0.4);
-  background: rgba(0, 200, 83, 0.1);
+  border-color: rgba(105, 240, 174, 0.4);
+  background: rgba(105, 240, 174, 0.06);
 }
 
 .mod-review[data-status="rejected"] .mod-review-badge {
   color: #ff8a80;
-  border-color: rgba(255, 77, 77, 0.5);
+  border-color: rgba(255, 138, 128, 0.45);
+  background: rgba(255, 138, 128, 0.06);
 }
 
 .mod-review-date {
@@ -262,7 +288,7 @@
   gap: 10px;
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 1px solid rgba(255, 77, 77, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .mod-action {
@@ -303,12 +329,316 @@
 }
 
 .mod-action--muted {
-  background: rgba(255, 255, 255, 0.06);
-  color: #ccc;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(230, 235, 245, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .mod-action--muted:hover:not(:disabled) {
-  border-color: rgba(255, 77, 77, 0.35);
+  border-color: rgba(255, 138, 128, 0.45);
   color: #fff;
+}
+
+.mod-mod-note {
+  margin: 8px 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 152, 0, 0.08);
+  border: 1px solid rgba(255, 183, 77, 0.25);
+  font-size: 13px;
+  line-height: 1.45;
+  color: #ffcc80;
+}
+
+.mod-mod-note-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #ffb74d;
+  margin-bottom: 6px;
+}
+
+.mod-reject-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.mod-reject-dialog {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(30, 30, 30, 0.96);
+  border: 1px solid rgba(255, 77, 77, 0.35);
+  border-radius: 16px;
+  padding: 22px 22px 18px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+.mod-reject-title {
+  margin: 0 0 10px;
+  color: #fff;
+  font-size: 1.15rem;
+}
+
+.mod-reject-preview {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #bbb;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.mod-reject-label {
+  display: block;
+  font-size: 13px;
+  color: #ccc;
+  margin-bottom: 8px;
+}
+
+.mod-reject-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.35);
+  color: #eee;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 16px;
+}
+
+.mod-reject-textarea:focus {
+  outline: none;
+  border-color: rgba(255, 77, 77, 0.45);
+}
+
+.mod-reject-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mod-domain-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mod-domain-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(215, 220, 232, 0.92);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.mod-domain-chip:hover {
+  border-color: rgba(255, 138, 128, 0.4);
+  color: #fff;
+}
+
+.mod-domain-chip--active {
+  border-color: rgba(255, 138, 128, 0.55);
+  background: rgba(255, 138, 128, 0.07);
+  color: #fff;
+}
+
+.mod-domain-chip-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ff8a80;
+  min-width: 1.2em;
+  text-align: center;
+}
+
+.mod-domain-chip--active .mod-domain-chip-count {
+  color: #ffcdd2;
+}
+
+.mod-review-rating-line {
+  font-size: 13px;
+  color: #ffd54f;
+  margin: 6px 0 4px;
+  font-weight: 600;
+}
+
+.mod-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mod-page-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
+  color: rgba(255, 230, 230, 0.92);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.mod-page-btn:hover:not(:disabled) {
+  border-color: rgba(255, 138, 128, 0.5);
+  color: #fff;
+}
+
+.mod-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mod-page-info {
+  font-size: 14px;
+  color: #aaa;
+}
+
+/* Сводка по базе (география / время / отклонения) */
+.mod-insights {
+  margin-bottom: 28px;
+}
+
+.mod-insights-title {
+  margin: 0 0 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.02em;
+}
+
+.mod-insights-grid {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(240px, 1.4fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+@media (max-width: 720px) {
+  .mod-insights-grid {
+    grid-template-columns: 1fr;
+  }
+  .mod-insights-card--wide {
+    grid-column: 1;
+  }
+}
+
+.mod-insights-card {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mod-insights-card--wide {
+  grid-column: 2;
+}
+
+.mod-insights-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(186, 200, 255, 0.85);
+  margin-bottom: 10px;
+}
+
+.mod-insights-value {
+  margin: 0;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.mod-insights-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(180, 188, 205, 0.85);
+}
+
+.mod-insights-empty {
+  margin: 0;
+  font-size: 14px;
+  color: #888;
+}
+
+.mod-insights-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mod-insights-bars li {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) minmax(0, 2fr) 36px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(230, 235, 245, 0.92);
+}
+
+.mod-insights-bar-name {
+  white-space: nowrap;
+}
+
+.mod-insights-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.mod-insights-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(125, 200, 255, 0.55),
+    rgba(200, 160, 255, 0.45)
+  );
+  min-width: 4px;
+  transition: width 0.25s ease;
+}
+
+.mod-insights-bar-count {
+  text-align: right;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
 }

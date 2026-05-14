@@ -1,20 +1,11 @@
 .profile-page {
   width: 100%;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a1a, #4b0000, #1a1a1a);
-  background-size: 200% 200%;
-  animation: bgMove 15s ease infinite;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 100px 20px 50px;
   position: relative;
-}
-
-@keyframes bgMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 .profile-container {

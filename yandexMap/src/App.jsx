@@ -5,17 +5,23 @@ import Register from './components/Auth/Register';
 import YandexMap from './components/Map/YandexMap';
 import Profile from './components/Profile/Profile';
 import Moderation from './components/Moderation/Moderation';
+import Admin from './components/Admin/Admin.jsx';
+import CursorGridGlow from './components/CursorGridGlow.jsx';
 
 function App() {
   return (
     <Router>
-      <Switch>
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
-        <Route path="/moderation" component={Moderation} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/" component={YandexMap} />
-      </Switch>
+      <>
+        <CursorGridGlow />
+        <Switch>
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+          <Route path="/admin" component={Admin} />
+          <Route path="/moderation" component={Moderation} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/" component={YandexMap} />
+        </Switch>
+      </>
     </Router>
   );
 }

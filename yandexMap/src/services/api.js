@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api";
+import { API_URL } from "../config.js";
 
 const CLASSIFIER_URL =
   import.meta.env.VITE_AI_CLASSIFIER_URL ||
@@ -124,34 +124,202 @@ export const register = async (email, password) => {
   }
 };
 
-export const getMarkers = async () => {
+export const getMarkers = async (params = {}) => {
   try {
-    console.log("Запрашиваем маркеры...");
-    
-    const response = await fetch(`${API_URL}/markers`);
-    
-    console.log("Статус ответа маркеров:", response.status);
-    console.log("Заголовки ответа маркеров:", response.headers);
-    
+    const qs = new URLSearchParams();
+    if (params.page != null && params.page > 0) {
+      qs.set("page", String(params.page));
+    }
+    if (params.page_size != null && params.page_size > 0) {
+      qs.set("page_size", String(params.page_size));
+    }
+    if (params.domain_key != null && params.domain_key !== "") {
+      qs.set("domain_key", String(params.domain_key));
+    }
+    if (params.status != null && params.status !== "") {
+      qs.set("status", String(params.status));
+    }
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+
+    const response = await fetch(`${API_URL}/markers${suffix}`);
+
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Ошибка при загрузке маркеров: ${response.status} ${errorText}`);
+      throw new Error(
+        `Ошибка при загрузке маркеров: ${response.status} ${errorText}`
+      );
     }
-    
-    const data = await response.json();
-    console.log("Получены маркеры:", data);
-    return data;
+
+    return response.json();
   } catch (error) {
     console.error("Ошибка в getMarkers:", error);
     throw error;
   }
 };
 
-/** Смена статуса метки (модератор): pending | approved | rejected | resolved */
-export const patchMarkerStatus = async (markerId, status) => {
+/** Все мои метки (любой статус) — для профиля */
+export const getMyMarkers = async () => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/markers/mine`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Ошибка загрузки моих меток");
+  }
+  return response.json();
+};
+
+export const getNotifications = async ({ limit = 40, offset = 0 } = {}) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const qs = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  const response = await fetch(`${API_URL}/notifications?${qs}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Ошибка уведомлений");
+  }
+  return response.json();
+};
+
+export const getNotificationsUnreadCount = async () => {
+  const token = getToken();
+  if (!token) return 0;
+  const response = await fetch(`${API_URL}/notifications/unread-count`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) return 0;
+  const data = await response.json();
+  return typeof data.unread === "number" ? data.unread : 0;
+};
+
+export const markNotificationRead = async (id) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/notifications/${id}/read`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Ошибка");
+  }
+  return response.json();
+};
+
+export const markAllNotificationsRead = async () => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/notifications/read-all`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Ошибка");
+  }
+  return response.json();
+};
+
+/** Сводка для модерации/админа (GET /api/moderation/stats) */
+export const getModerationStats = async () => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/moderation/stats`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (response.status === 401 || response.status === 403) {
+    const t = await response.text();
+    throw new Error(t || "Нет прав модератора");
+  }
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Ошибка статистики");
+  }
+  return response.json();
+};
+
+/** Средняя оценка и число отзывов по метке */
+export const getMarkerReviewSummary = async (markerId) => {
+  const response = await fetch(
+    `${API_URL}/markers/${markerId}/reviews/summary`
+  );
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "summary failed");
+  }
+  return response.json();
+};
+
+/** Мой отзыв по метке (нужен токен) */
+export const getMyMarkerReview = async (markerId) => {
+  const token = getToken();
+  if (!token) return { review: null };
+  const response = await fetch(`${API_URL}/markers/${markerId}/reviews/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (response.status === 401) return { review: null };
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "me failed");
+  }
+  return response.json();
+};
+
+/** Список отзывов */
+export const listMarkerReviews = async (markerId, { limit = 10, offset = 0 } = {}) => {
+  const qs = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+  const response = await fetch(
+    `${API_URL}/markers/${markerId}/reviews?${qs}`
+  );
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "list reviews failed");
+  }
+  return response.json();
+};
+
+/** Оставить или изменить отзыв (1–5 звёзд, опционально комментарий) */
+export const postMarkerReview = async (markerId, { rating, comment = "" }) => {
+  const token = getToken();
+  if (!token) throw new Error("Войдите, чтобы оставить отзыв.");
+  const response = await fetch(`${API_URL}/markers/${markerId}/reviews`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ rating, comment }),
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    let msg = t;
+    try {
+      const j = JSON.parse(t);
+      if (j.error) msg = j.error;
+    } catch {
+      /* plain text */
+    }
+    throw new Error(msg || "Не удалось сохранить отзыв");
+  }
+  return response.json();
+};
+
+/** Смена статуса метки (модератор): pending | approved | rejected | resolved; moderator_note — опционально */
+export const patchMarkerStatus = async (markerId, status, moderatorNote) => {
   const token = getToken();
   if (!token) {
     throw new Error("Требуется авторизация модератора.");
+  }
+  const body = { status };
+  if (moderatorNote != null && String(moderatorNote).trim() !== "") {
+    body.moderator_note = String(moderatorNote).trim();
   }
   const response = await fetch(`${API_URL}/markers/${markerId}/status`, {
     method: "PATCH",
@@ -159,7 +327,7 @@ export const patchMarkerStatus = async (markerId, status) => {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify(body),
   });
   if (response.status === 401 || response.status === 403) {
     const t = await response.text();
@@ -247,6 +415,47 @@ export const uploadImage = async (file) => {
     console.error("Ошибка в uploadImage:", error);
     throw error;
   }
+};
+
+/** Список пользователей (только администратор) */
+export const getAdminUsers = async () => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/admin/users`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (response.status === 401 || response.status === 403) {
+    const t = await response.text();
+    throw new Error(t || "Нет прав администратора");
+  }
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Ошибка загрузки пользователей");
+  }
+  return response.json();
+};
+
+/** Смена ролей пользователя (только администратор) */
+export const patchAdminUser = async (userId, payload) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/admin/users/${userId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (response.status === 401 || response.status === 403) {
+    const t = await response.text();
+    throw new Error(t || "Нет прав администратора");
+  }
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Не удалось обновить пользователя");
+  }
+  return response.json();
 };
 
 export const testRegister = async () => {

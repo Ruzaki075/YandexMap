@@ -1,0 +1,427 @@
+/* Общая тема: фон aurora + сетка, стеклянные панели, тонкие обводки (как модерация / колокольчик) */
+
+:root {
+  --app-bg-deep: #05060c;
+  --app-accent-soft: #ff8a80;
+  --app-accent-strong: #f06292;
+  --app-glass-bg: rgba(10, 12, 22, 0.78);
+  --app-glass-border: rgba(255, 255, 255, 0.09);
+  --app-line: rgba(255, 255, 255, 0.1);
+  --app-text-muted: rgba(200, 206, 220, 0.88);
+}
+
+body {
+  background-color: var(--app-bg-deep);
+}
+
+/* --- Aurora + сетка (страницы и карта), подсветка курсора --- */
+.page-aurora {
+  --cursor-x: 50%;
+  --cursor-y: 38%;
+  position: relative;
+  overflow: hidden;
+  animation: none !important;
+  background: var(--app-bg-deep) !important;
+  background-size: auto !important;
+}
+
+.page-aurora::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(ellipse 55% 45% at 15% 20%, rgba(124, 92, 255, 0.28), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 88% 75%, rgba(236, 72, 153, 0.18), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(34, 211, 238, 0.12), transparent 55%);
+  animation: appAurora 20s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Сверху вниз: яркое ядро у курсора, мягкое ореол, крупная сетка, мелкая сетка (в духе промо API Карт) */
+  background-image:
+    radial-gradient(
+      340px circle at var(--cursor-x) var(--cursor-y),
+      rgba(200, 230, 255, 0.38),
+      rgba(120, 170, 255, 0.12) 42%,
+      transparent 68%
+    ),
+    radial-gradient(
+      720px circle at var(--cursor-x) var(--cursor-y),
+      rgba(255, 190, 220, 0.07),
+      rgba(140, 180, 255, 0.05) 45%,
+      transparent 65%
+    ),
+    linear-gradient(rgba(150, 188, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(150, 188, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    160px 160px,
+    160px 160px,
+    40px 40px,
+    40px 40px;
+  background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  mask-image: radial-gradient(ellipse 96% 88% at 50% 42%, black 0%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 96% 88% at 50% 42%, black 0%, transparent 80%);
+  opacity: 0.68;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-aurora::after {
+    opacity: 0.45;
+  }
+}
+
+@keyframes appAurora {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(3%, 2%) rotate(2deg);
+    opacity: 1;
+  }
+}
+
+.page-aurora > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Карта: полоса под шапкой */
+.page-aurora.map-page .map-container {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* --- Стекло: контейнеры --- */
+.page-aurora .profile-container,
+.page-aurora .auth-box {
+  background: var(--app-glass-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--app-glass-border);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+}
+
+.page-aurora .profile-container {
+  border-radius: 20px;
+}
+
+.page-aurora .auth-box {
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+}
+
+.page-aurora .profile-container.mod-container {
+  max-width: 960px;
+}
+
+/* --- Профиль / админ / общие карточки --- */
+.page-aurora .stat-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  transform: none;
+}
+
+.page-aurora .stat-card::before {
+  display: none;
+}
+
+.page-aurora .stat-card:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(255, 255, 255, 0.14);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.page-aurora .stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.page-aurora .stat-content h3 {
+  text-shadow: none;
+}
+
+.page-aurora .mark-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.page-aurora .mark-item:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(255, 255, 255, 0.14);
+  transform: translateX(4px);
+}
+
+.page-aurora .mark-status {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.page-aurora .mark-status[data-status="pending"] {
+  border-color: rgba(255, 193, 7, 0.35);
+  color: #ffd54f;
+}
+
+.page-aurora .mark-status[data-status="resolved"],
+.page-aurora .mark-status[data-status="approved"] {
+  border-color: rgba(105, 240, 174, 0.35);
+  color: #69f0ae;
+}
+
+.page-aurora .mark-status[data-status="rejected"] {
+  border-color: rgba(255, 138, 128, 0.4);
+  color: #ff8a80;
+}
+
+.page-aurora .mark-status-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(230, 235, 245, 0.9);
+}
+
+.page-aurora .mark-item[data-status="pending"] .mark-status-pill {
+  color: #ffd54f;
+  border-color: rgba(255, 213, 79, 0.35);
+}
+
+.page-aurora .mark-item[data-status="approved"] .mark-status-pill,
+.page-aurora .mark-item[data-status="resolved"] .mark-status-pill {
+  color: #69f0ae;
+  border-color: rgba(105, 240, 174, 0.35);
+}
+
+.page-aurora .mark-item[data-status="rejected"] .mark-status-pill {
+  color: #ff8a80;
+  border-color: rgba(255, 138, 128, 0.35);
+}
+
+.page-aurora .view-all {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.page-aurora .view-all:hover {
+  color: var(--app-accent-soft);
+  text-shadow: none;
+}
+
+.page-aurora .section-header h2 {
+  text-shadow: none;
+}
+
+.page-aurora .logout-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 230, 230, 0.92);
+}
+
+.page-aurora .logout-btn:hover {
+  border-color: rgba(255, 138, 128, 0.45);
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+
+.page-aurora .avatar-circle {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: none;
+  animation: none;
+}
+
+.page-aurora .online-dot {
+  border-color: rgba(10, 12, 22, 0.95);
+}
+
+.page-aurora .profile-name {
+  text-shadow: none;
+}
+
+.page-aurora .profile-role {
+  color: rgba(186, 200, 255, 0.92);
+}
+
+.page-aurora .empty-state {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.page-aurora .empty-state svg {
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.page-aurora .mark-actions .view-btn {
+  background: transparent;
+  color: rgba(255, 230, 230, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.page-aurora .mark-actions .view-btn:hover {
+  border-color: rgba(255, 138, 128, 0.45);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.page-aurora .action-btn.secondary {
+  background: transparent;
+  color: rgba(230, 235, 245, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.page-aurora .action-btn.secondary:hover {
+  border-color: rgba(255, 138, 128, 0.45);
+  color: #fff;
+}
+
+.page-aurora .action-btn.primary {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 138, 128, 0.95),
+    rgba(192, 72, 130, 0.92)
+  );
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.page-aurora .action-btn.primary:hover {
+  box-shadow: 0 12px 28px rgba(236, 72, 153, 0.2);
+}
+
+.page-aurora .add-first-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 138, 128, 0.95),
+    rgba(192, 72, 130, 0.92)
+  );
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.page-aurora .add-first-btn:hover {
+  box-shadow: 0 12px 28px rgba(236, 72, 153, 0.2);
+}
+
+.page-aurora .profile-loading {
+  color: var(--app-text-muted);
+  min-height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.page-aurora .profile-loading .loading-spinner {
+  border-color: rgba(255, 255, 255, 0.12);
+  border-top-color: rgba(125, 200, 255, 0.85);
+}
+
+.page-aurora .loading-spinner {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  border-top-color: rgba(125, 200, 255, 0.85) !important;
+}
+
+/* --- Авторизация --- */
+.page-aurora .auth-title {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+}
+
+.page-aurora .auth-field label {
+  color: var(--app-text-muted);
+}
+
+.page-aurora .auth-field input {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+}
+
+.page-aurora .auth-field input:focus {
+  border-color: rgba(255, 138, 128, 0.55);
+}
+
+.page-aurora .auth-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 138, 128, 0.95),
+    rgba(192, 72, 130, 0.92)
+  );
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.page-aurora .auth-btn:hover {
+  filter: brightness(1.06);
+}
+
+.page-aurora .auth-link {
+  color: var(--app-accent-soft);
+}
+
+.page-aurora .auth-link:hover {
+  color: #fff;
+}
+
+.page-aurora .auth-switch {
+  color: rgba(230, 235, 245, 0.88);
+}
+
+.page-aurora .auth-error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  background: rgba(255, 138, 128, 0.08);
+  border: 1px solid rgba(255, 138, 128, 0.35);
+  color: rgba(255, 220, 215, 0.95);
+}
+
+/* Модерация — те же токены */
+.page-aurora .mod-loading {
+  color: rgba(200, 210, 230, 0.9);
+}
+
+.page-aurora .mod-loading .loading-spinner {
+  border-color: rgba(255, 255, 255, 0.12);
+  border-top-color: rgba(125, 200, 255, 0.85);
+}
+
+.page-aurora .empty-state.mod-empty {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.page-aurora .mod-review-cat {
+  color: rgba(186, 200, 255, 0.92);
+}
+
+.page-aurora .mod-alert {
+  background: rgba(255, 138, 128, 0.08);
+  border: 1px solid rgba(255, 138, 128, 0.35);
+  color: rgba(255, 220, 215, 0.95);
+}
+
+.page-aurora .mod-reject-dialog {
+  background: rgba(14, 16, 28, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}

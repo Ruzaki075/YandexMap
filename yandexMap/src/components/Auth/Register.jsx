@@ -58,7 +58,7 @@ export default function Register() {
     <>
       <MapHeader />
 
-      <div className="auth-page">
+      <div className="auth-page page-aurora">
         <div className="auth-box">
           <h2 className="auth-title">Регистрация</h2>
           

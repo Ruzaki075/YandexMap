@@ -13,10 +13,13 @@ type Marker struct {
 	GroupKey     string    `json:"group_key,omitempty"`
 	IssueKey     string    `json:"issue_key,omitempty"`
 	AIConfidence *float64  `json:"ai_confidence,omitempty"`
-	Status       string    `json:"status"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	UserEmail    string    `json:"user_email,omitempty"`
+	Status         string    `json:"status"`
+	ModeratorNote  string    `json:"moderator_note,omitempty"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	UserEmail      string    `json:"user_email,omitempty"`
+	ReviewCount    int       `json:"review_count,omitempty"`
+	ReviewAvg      *float64  `json:"review_avg,omitempty"`
 }
 
 type CreateMarkerRequest struct {

@@ -31,10 +31,11 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), 14)
 
 	var id int
+	var createdAt time.Time
 	err := database.DB.QueryRow(
-		"INSERT INTO users(email, password) VALUES($1, $2) RETURNING id",
+		"INSERT INTO users(email, password) VALUES($1, $2) RETURNING id, created_at",
 		req.Email, string(hashedPassword),
-	).Scan(&id)
+	).Scan(&id, &createdAt)
 
 	if err != nil {
 		if err.Error() == "pq: duplicate key value violates unique constraint \"users_email_key\"" {
@@ -51,7 +52,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		"user": map[string]interface{}{
 			"id":            id,
 			"email":         req.Email,
-			"is_moderator": false,
+			"is_moderator":  false,
+			"is_admin":      false,
+			"created_at":    createdAt.UTC().Format(time.RFC3339),
 		},
 		"status": "success",
 	})
@@ -71,10 +74,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var userID int
 	var hashedPassword string
 	var isModerator bool
+	var isAdmin bool
+	var createdAt time.Time
 	err := database.DB.QueryRow(
-		"SELECT id, password, COALESCE(is_moderator, FALSE) FROM users WHERE email = $1",
+		"SELECT id, password, COALESCE(is_moderator, FALSE), COALESCE(is_admin, FALSE), created_at FROM users WHERE email = $1",
 		req.Email,
-	).Scan(&userID, &hashedPassword, &isModerator)
+	).Scan(&userID, &hashedPassword, &isModerator, &isAdmin, &createdAt)
 
 	if err == sql.ErrNoRows {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
@@ -94,6 +99,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		UserID:      userID,
 		Email:       req.Email,
 		IsModerator: isModerator,
+		IsAdmin:     isAdmin,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -114,7 +120,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		"user": map[string]interface{}{
 			"id":            userID,
 			"email":         req.Email,
-			"is_moderator": isModerator,
+			"is_moderator":  isModerator,
+			"is_admin":      isAdmin,
+			"created_at":    createdAt.UTC().Format(time.RFC3339),
 		},
 		"status": "success",
 	})

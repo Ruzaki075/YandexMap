@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AuthContext } from "./AuthContext";
+import { API_URL } from "../../config.js";
 
 function readUserFromStorage() {
   const userStr = localStorage.getItem("user");
@@ -7,7 +8,11 @@ function readUserFromStorage() {
   try {
     const u = JSON.parse(userStr);
     if (!u || typeof u !== "object") return null;
-    return { ...u, is_moderator: Boolean(u.is_moderator) };
+    return {
+      ...u,
+      is_moderator: Boolean(u.is_moderator),
+      is_admin: Boolean(u.is_admin),
+    };
   } catch {
     return null;
   }
@@ -17,7 +22,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => readUserFromStorage());
 
   const login = async (email, password) => {
-    const res = await fetch("http://localhost:8080/api/login", {
+    const res = await fetch(`${API_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -28,7 +33,11 @@ export const AuthProvider = ({ children }) => {
     const data = await res.json();
 
     const normalized = data.user
-      ? { ...data.user, is_moderator: Boolean(data.user.is_moderator) }
+      ? {
+          ...data.user,
+          is_moderator: Boolean(data.user.is_moderator),
+          is_admin: Boolean(data.user.is_admin),
+        }
       : null;
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(normalized));

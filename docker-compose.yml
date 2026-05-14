@@ -28,6 +28,8 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: host=db port=5432 user=postgres password=postgres dbname=yandexmap sslmode=disable
+      JWT_SECRET: change-me-in-production
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
     ports:
       - "8080:8080"
     volumes:
@@ -51,6 +53,8 @@ services:
     depends_on:
       - backend
       - classifier
+    environment:
+      VITE_API_URL: http://localhost:8080
     ports:
       - "5173:5173"
 

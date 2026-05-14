@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useContext } from "react";
+import { useLocation, Link } from "react-router-dom";
 import { YMaps, Map, Placemark } from "@pbe/react-yandex-maps";
 import issueTaxonomy from "@issue-taxonomy";
 import MapHeader from "./MapHeader.jsx";
+import { AuthContext } from "../Auth/AuthContext.jsx";
+import { API_ORIGIN } from "../../config.js";
 import {
   classifyProblemText,
   classifyProblemImage,
+  getMarkerReviewSummary,
+  getMyMarkerReview,
+  listMarkerReviews,
+  postMarkerReview,
 } from "../../services/api.js";
 import {
   findCategoryLabels,
@@ -28,8 +35,6 @@ const getColorByUser = (userId) => {
   if (!userId) return "islands#grayIcon";
   return USER_COLORS[userId % USER_COLORS.length];
 };
-
-const API_ORIGIN = "http://localhost:8080";
 
 function escapeHtml(str) {
   if (str == null || str === "") return "";
@@ -84,6 +89,17 @@ function buildMarkerBalloonHtml(p, taxonomy) {
     );
   }
 
+  const rc = Number(p.review_count) || 0;
+  if (rc > 0) {
+    const avg =
+      p.review_avg != null && !Number.isNaN(Number(p.review_avg))
+        ? Number(p.review_avg).toFixed(1)
+        : "—";
+    chunks.push(
+      `<div style="font-size:12px;font-weight:600;color:#b45309;margin-bottom:8px;">Оценка людей: ${avg} ★ (${rc})</div>`
+    );
+  }
+
   chunks.push(
     `<div style="font-size:14px;line-height:1.55;color:#374151;word-break:break-word;overflow-wrap:anywhere;white-space:pre-wrap;margin-bottom:12px;">${escapeHtml(
       p.text || "—"
@@ -104,7 +120,27 @@ function buildMarkerBalloonHtml(p, taxonomy) {
   return chunks.join("");
 }
 
+function authHeadersJson() {
+  const token = localStorage.getItem("token");
+  const h = { "Content-Type": "application/json" };
+  if (token && token !== "undefined" && token !== "null") {
+    h.Authorization = `Bearer ${token}`;
+  }
+  return h;
+}
+
+function authHeadersMultipart() {
+  const token = localStorage.getItem("token");
+  const h = {};
+  if (token && token !== "undefined" && token !== "null") {
+    h.Authorization = `Bearer ${token}`;
+  }
+  return h;
+}
+
 const YandexMap = () => {
+  const { user } = useContext(AuthContext);
+  const location = useLocation();
   const [placemarks, setPlacemarks] = useState([]);
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [newPointText, setNewPointText] = useState("");
@@ -123,6 +159,17 @@ const YandexMap = () => {
   const [detectionBusy, setDetectionBusy] = useState(false);
   const [detectionHint, setDetectionHint] = useState(null);
 
+  const [reviewBlock, setReviewBlock] = useState({
+    summary: null,
+    mine: null,
+    list: [],
+    loading: false,
+    err: "",
+  });
+  const [reviewRating, setReviewRating] = useState(4);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSaving, setReviewSaving] = useState(false);
+
   const skipAutoSelectsRef = useRef(false);
   const suppressTextClassifyRef = useRef(false);
   const textClassifySeq = useRef(0);
@@ -137,6 +184,62 @@ const YandexMap = () => {
   useEffect(() => {
     loadMarkers();
   }, []);
+
+  useEffect(() => {
+    const id = new URLSearchParams(location.search).get("marker");
+    if (!id || !Array.isArray(placemarks) || placemarks.length === 0) return;
+    const num = parseInt(id, 10);
+    if (Number.isNaN(num)) return;
+    const found = placemarks.find((p) => Number(p.id) === num);
+    if (found) setSelectedMarker(found);
+  }, [location.search, placemarks]);
+
+  useEffect(() => {
+    if (!selectedMarker?.id) return;
+    let cancelled = false;
+    (async () => {
+      setReviewBlock((s) => ({ ...s, loading: true, err: "" }));
+      try {
+        const sum = await getMarkerReviewSummary(selectedMarker.id);
+        const listData = await listMarkerReviews(selectedMarker.id, {
+          limit: 8,
+          offset: 0,
+        });
+        let mine = null;
+        try {
+          const m = await getMyMarkerReview(selectedMarker.id);
+          mine = m?.review ?? null;
+        } catch {
+          mine = null;
+        }
+        if (cancelled) return;
+        setReviewBlock({
+          summary: sum,
+          mine,
+          list: listData.reviews || [],
+          loading: false,
+          err: "",
+        });
+        if (mine?.rating) {
+          setReviewRating(mine.rating);
+        } else {
+          setReviewRating(4);
+        }
+        setReviewComment(mine?.comment || "");
+      } catch (e) {
+        if (!cancelled) {
+          setReviewBlock((s) => ({
+            ...s,
+            loading: false,
+            err: e.message || "Ошибка отзывов",
+          }));
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedMarker?.id]);
 
   const applyClassifierBest = useCallback((data, viaLabel) => {
     const best = data.best;
@@ -282,13 +385,18 @@ const YandexMap = () => {
   const loadMarkers = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:8080/api/markers");
+      const response = await fetch(`${API_ORIGIN}/api/markers`);
       if (!response.ok) throw new Error("Failed to load markers");
       const data = await response.json();
 
       // Защита от формата ответа; на карте не показываем отклонённые модератором
       const raw = Array.isArray(data) ? data : data.markers || [];
-      setPlacemarks(raw.filter((m) => (m.status || "pending") !== "rejected"));
+      setPlacemarks(
+        raw.filter((m) => {
+          const s = m.status || "pending";
+          return s === "approved" || s === "resolved";
+        })
+      );
     } catch (error) {
       console.error("Error loading markers:", error);
       alert("Ошибка загрузки меток");
@@ -354,8 +462,79 @@ const YandexMap = () => {
     setSelectedMarker(marker);
   };
 
+  const submitReview = async () => {
+    if (!selectedMarker || !user) {
+      alert("Войдите в аккаунт, чтобы оставить отзыв.");
+      return;
+    }
+    if (user.id === selectedMarker.user_id) {
+      alert("Нельзя оценивать собственное обращение.");
+      return;
+    }
+    if (reviewRating < 1 || reviewRating > 5) {
+      alert("Выберите оценку от 1 до 5.");
+      return;
+    }
+    setReviewSaving(true);
+    try {
+      const res = await postMarkerReview(selectedMarker.id, {
+        rating: reviewRating,
+        comment: reviewComment,
+      });
+      const rc = res.review_count ?? 0;
+      const ra = res.review_avg;
+      setPlacemarks((prev) =>
+        prev.map((p) =>
+          p.id === selectedMarker.id
+            ? {
+                ...p,
+                review_count: rc,
+                review_avg:
+                  ra != null ? Number(ra) : p.review_avg,
+              }
+            : p
+        )
+      );
+      setSelectedMarker((m) =>
+        m && m.id === selectedMarker.id
+          ? {
+              ...m,
+              review_count: rc,
+              review_avg: ra != null ? Number(ra) : m.review_avg,
+            }
+          : m
+      );
+      const sum = await getMarkerReviewSummary(selectedMarker.id);
+      const listData = await listMarkerReviews(selectedMarker.id, {
+        limit: 8,
+        offset: 0,
+      });
+      const m = await getMyMarkerReview(selectedMarker.id);
+      setReviewBlock({
+        summary: sum,
+        mine: m?.review ?? null,
+        list: listData.reviews || [],
+        loading: false,
+        err: "",
+      });
+    } catch (e) {
+      alert(e.message || "Не удалось сохранить отзыв");
+    } finally {
+      setReviewSaving(false);
+    }
+  };
+
   const closeModal = () => {
     setSelectedMarker(null);
+    setReviewBlock({
+      summary: null,
+      mine: null,
+      list: [],
+      loading: false,
+      err: "",
+    });
+    setReviewComment("");
+    setReviewRating(4);
   };
 
   const uploadImage = async (file) => {
@@ -363,12 +542,19 @@ const YandexMap = () => {
     formData.append("image", file);
 
     try {
-      const response = await fetch("http://localhost:8080/api/upload", {
+      const response = await fetch(`${API_ORIGIN}/api/upload`, {
         method: "POST",
+        headers: authHeadersMultipart(),
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Failed to upload image");
+      if (!response.ok) {
+        if (response.status === 401) {
+          alert("Выполните вход заново — для загрузки фото нужна авторизация.");
+          throw new Error("Unauthorized");
+        }
+        throw new Error("Failed to upload image");
+      }
       const data = await response.json();
       return data.image_url;
     } catch (error) {
@@ -425,15 +611,17 @@ const YandexMap = () => {
 
       console.log("Отправляем маркер:", markerData);
 
-      const response = await fetch("http://localhost:8080/api/markers", {
+      const response = await fetch(`${API_ORIGIN}/api/markers`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: authHeadersJson(),
         body: JSON.stringify(markerData),
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          alert("Выполните вход заново — сессия устарела или нет токена.");
+          throw new Error("Unauthorized");
+        }
         const errorText = await response.text();
         throw new Error(`Failed to create marker: ${errorText}`);
       }
@@ -457,7 +645,9 @@ const YandexMap = () => {
       setDetectionVia(null);
       setDetectionHint(null);
 
-      alert("Метка успешно добавлена!");
+      alert(
+        "Заявка отправлена на модерацию. После одобрения метка появится на карте; статус смотрите в профиле. О решении придёт уведомление."
+      );
     } catch (error) {
       console.error("Error adding point:", error);
       alert("Ошибка при добавлении метки: " + error.message);
@@ -492,7 +682,7 @@ const YandexMap = () => {
     : null;
 
   return (
-    <div className="map-page">
+    <div className="map-page page-aurora">
       <MapHeader />
 
       <div className="map-container">
@@ -604,6 +794,140 @@ const YandexMap = () => {
                 <div className="modal-prose">
                   {selectedMarker.text || "Без описания"}
                 </div>
+              </section>
+
+              <section className="modal-section modal-reviews-section">
+                <h3 className="modal-section-title">Отзывы и оценки</h3>
+                {reviewBlock.loading ? (
+                  <p className="modal-reviews-muted">Загрузка…</p>
+                ) : reviewBlock.err ? (
+                  <p className="modal-reviews-err">{reviewBlock.err}</p>
+                ) : (
+                  <>
+                    <div className="modal-reviews-summary">
+                      {reviewBlock.summary?.count > 0 ? (
+                        <>
+                          <span className="modal-reviews-stars" aria-hidden="true">
+                            {"★".repeat(
+                              Math.round(
+                                Number(reviewBlock.summary.avg) || 0
+                              )
+                            )}
+                            <span className="modal-reviews-stars-muted">
+                              {"☆".repeat(
+                                5 -
+                                  Math.min(
+                                    5,
+                                    Math.round(
+                                      Number(reviewBlock.summary.avg) || 0
+                                    )
+                                  )
+                              )}
+                            </span>
+                          </span>
+                          <span className="modal-reviews-num">
+                            {Number(reviewBlock.summary.avg).toFixed(1)} ·{" "}
+                            {reviewBlock.summary.count}{" "}
+                            {reviewBlock.summary.count === 1
+                              ? "оценка"
+                              : "оценок"}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="modal-reviews-muted">
+                          Пока нет оценок — будьте первым (кроме автора).
+                        </span>
+                      )}
+                    </div>
+
+                    {user &&
+                    selectedMarker.user_id &&
+                    user.id !== selectedMarker.user_id ? (
+                      <div className="modal-review-form">
+                        <p className="modal-reviews-label">Ваша оценка</p>
+                        <div className="modal-star-row" role="group" aria-label="Оценка 1–5">
+                          {[1, 2, 3, 4, 5].map((n) => (
+                            <button
+                              key={n}
+                              type="button"
+                              className={`modal-star-btn${reviewRating >= n ? " modal-star-btn--on" : ""}`}
+                              onClick={() => setReviewRating(n)}
+                              aria-pressed={reviewRating >= n}
+                              aria-label={`${n} из 5`}
+                            >
+                              ★
+                            </button>
+                          ))}
+                        </div>
+                        <label className="modal-reviews-label" htmlFor="modal-review-comment">
+                          Комментарий (необязательно)
+                        </label>
+                        <textarea
+                          id="modal-review-comment"
+                          className="modal-review-textarea"
+                          rows={3}
+                          maxLength={2000}
+                          value={reviewComment}
+                          onChange={(e) => setReviewComment(e.target.value)}
+                          placeholder="Например: подтверждаю, здесь регулярно неудобно…"
+                        />
+                        <button
+                          type="button"
+                          className="modal-review-submit"
+                          onClick={submitReview}
+                          disabled={reviewSaving}
+                        >
+                          {reviewSaving ? "Сохранение…" : "Отправить отзыв"}
+                        </button>
+                        {reviewBlock.mine ? (
+                          <p className="modal-reviews-hint">
+                            Вы уже оставляли отзыв — повторная отправка обновит
+                            оценку и текст.
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : user &&
+                      selectedMarker.user_id &&
+                      user.id === selectedMarker.user_id ? (
+                      <p className="modal-reviews-muted">
+                        Автор обращения не участвует в оценке.
+                      </p>
+                    ) : (
+                      <p className="modal-reviews-muted">
+                        <Link to="/login">Войдите</Link>, чтобы оставить оценку.
+                      </p>
+                    )}
+
+                    {reviewBlock.list?.length > 0 ? (
+                      <ul className="modal-reviews-list">
+                        {reviewBlock.list.map((r) => (
+                          <li key={r.id} className="modal-review-item">
+                            <div className="modal-review-item-head">
+                              <span className="modal-review-email">
+                                {r.user_email || `Пользователь #${r.user_id}`}
+                              </span>
+                              <span className="modal-review-item-stars">
+                                {"★".repeat(r.rating)}
+                                <span className="modal-reviews-stars-muted">
+                                  {"☆".repeat(5 - r.rating)}
+                                </span>
+                              </span>
+                            </div>
+                            {r.comment ? (
+                              <p className="modal-review-item-text">{r.comment}</p>
+                            ) : null}
+                            <time
+                              className="modal-review-time"
+                              dateTime={r.created_at}
+                            >
+                              {new Date(r.created_at).toLocaleString("ru-RU")}
+                            </time>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </>
+                )}
               </section>
 
               <section className="modal-section modal-section--coords">

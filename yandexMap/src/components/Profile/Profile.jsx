@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useHistory, Link } from "react-router-dom";
 import MapHeader from "../Map/MapHeader.jsx";
+import {
+  IconRowPending,
+  IconRowRejected,
+  IconRowOk,
+} from "../Moderation/ModerationIcons.jsx";
+import { getMyMarkers } from "../../services/api.js";
 import "./Profile.css";
 
 /** Одобрено модератором или отмечено решённым — в профиле считаем «обработано». */
@@ -40,10 +46,9 @@ const Profile = () => {
       const userData = JSON.parse(userStr);
       setUser(userData);
 
-      const response = await fetch("http://localhost:8080/api/markers");
-      if (response.ok) {
-        const data = await response.json();
-        const markers = data.markers?.filter(marker => marker.user_id === userData.id) || [];
+      const data = await getMyMarkers();
+      if (data) {
+        const markers = data.markers || [];
         setUserMarkers(markers);
 
         const total = markers.length;
@@ -90,9 +95,11 @@ const Profile = () => {
     return (
       <>
         <MapHeader />
-        <div className="profile-loading">
-          <div className="loading-spinner"></div>
-          <p>Загрузка профиля...</p>
+        <div className="profile-page page-aurora">
+          <div className="profile-loading">
+            <div className="loading-spinner"></div>
+            <p>Загрузка профиля...</p>
+          </div>
         </div>
       </>
     );
@@ -106,7 +113,7 @@ const Profile = () => {
     <>
       <MapHeader />
 
-      <div className="profile-page">
+      <div className="profile-page page-aurora">
         <div className="profile-container">
           <div className="profile-header">
             <div className="profile-avatar">
@@ -119,7 +126,11 @@ const Profile = () => {
             <div className="profile-info">
               <h1 className="profile-name">{user.email}</h1>
               <p className="profile-role">
-                {Boolean(user.is_moderator) ? "Модератор" : "Активный пользователь"}
+                {Boolean(user.is_admin)
+                  ? "Администратор"
+                  : Boolean(user.is_moderator)
+                    ? "Модератор"
+                    : "Активный пользователь"}
               </p>
               <p className="profile-join-date">
                 Зарегистрирован {formatDate(user.created_at || new Date())}
@@ -128,7 +139,7 @@ const Profile = () => {
 
             <button className="logout-btn" onClick={handleLogout}>
               <span>Выйти</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                 <polyline points="16 17 21 12 16 7"></polyline>
                 <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -139,7 +150,7 @@ const Profile = () => {
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-icon total">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
@@ -152,7 +163,7 @@ const Profile = () => {
 
             <div className="stat-card">
               <div className="stat-icon pending">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
@@ -165,7 +176,7 @@ const Profile = () => {
 
             <div className="stat-card">
               <div className="stat-icon resolved">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                   <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
@@ -186,7 +197,7 @@ const Profile = () => {
 
             {userMarkers.length === 0 ? (
               <div className="empty-state">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
@@ -198,11 +209,13 @@ const Profile = () => {
                 {userMarkers.slice(0, 5).map(marker => {
                   const st = marker.status || "pending";
                   const icon =
-                    st === "pending"
-                      ? "⏳"
-                      : st === "rejected"
-                        ? "⛔"
-                        : "✅";
+                    st === "pending" ? (
+                      <IconRowPending size={22} />
+                    ) : st === "rejected" ? (
+                      <IconRowRejected size={22} />
+                    ) : (
+                      <IconRowOk size={22} />
+                    );
                   return (
                   <div key={marker.id} className="mark-item" data-status={st}>
                     <div className="mark-status" data-status={st}>
@@ -237,13 +250,13 @@ const Profile = () => {
 
           <div className="profile-actions">
             <Link to="/" className="action-btn primary">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                 <path d="M12 5v14M5 12h14"></path>
               </svg>
               Добавить новую проблему
             </Link>
             <button className="action-btn secondary" onClick={() => history.push("/")}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                 <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
                 <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
               </svg>

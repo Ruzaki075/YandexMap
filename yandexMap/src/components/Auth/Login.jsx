@@ -34,7 +34,7 @@ export default function Login() {
     <>
       <MapHeader />
 
-      <div className="auth-page">
+      <div className="auth-page page-aurora">
         <div className="auth-box">
           <h2 className="auth-title">Вход</h2>
           
