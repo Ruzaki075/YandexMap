@@ -32,6 +32,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 _bundle = None
 _taxonomy_index: dict[str, dict] = {}
+_taxonomy_mtime: float | None = None
 # None = ещё не пробовали, False = недоступен, иначе easyocr.Reader
 _ocr_reader = None
 # CLIP: None не пробовали, False ошибка, иначе (model, processor)
@@ -55,6 +56,18 @@ def _build_taxonomy_index() -> dict[str, dict]:
             "leaf": leaf,
         }
     return idx
+
+
+def _ensure_taxonomy_index() -> None:
+    """Перечитать таксономию, если backend обновил issue-taxonomy.json."""
+    global _taxonomy_index, _taxonomy_mtime
+    try:
+        mtime = TAXONOMY_PATH.stat().st_mtime
+    except OSError:
+        return
+    if _taxonomy_mtime is None or mtime != _taxonomy_mtime:
+        _taxonomy_index = _build_taxonomy_index()
+        _taxonomy_mtime = mtime
 
 
 def _tokenize(s: str) -> set[str]:
@@ -304,6 +317,7 @@ def taxonomy():
 def classify():
     if request.method == "OPTIONS":
         return "", 204
+    _ensure_taxonomy_index()
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
     top_k = int(data.get("top_k") or 3)
@@ -319,6 +333,7 @@ def classify():
 def classify_image():
     if request.method == "OPTIONS":
         return "", 204
+    _ensure_taxonomy_index()
     top_k = int(request.form.get("top_k") or 3)
 
     if "image" not in request.files:
@@ -454,8 +469,7 @@ def classify_image():
 
 
 def main():
-    global _taxonomy_index
-    _taxonomy_index = _build_taxonomy_index()
+    _ensure_taxonomy_index()
     _load_bundle()
     port = int(os.environ.get("PORT", "5055"))
     app.run(host="0.0.0.0", port=port, debug=False)

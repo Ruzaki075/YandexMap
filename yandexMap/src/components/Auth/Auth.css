@@ -3,81 +3,169 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: 32px 24px;
   box-sizing: border-box;
 }
 
 .auth-box {
+  position: relative;
   width: 100%;
-  max-width: 380px;
-  padding: 40px;
-  border-radius: 16px;
+  max-width: 460px;
+  padding: 44px 40px 40px;
+  border-radius: 24px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0;
   box-sizing: border-box;
+  overflow: hidden;
+}
+
+.auth-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 138, 128, 0.15),
+    rgba(255, 138, 128, 0.95) 35%,
+    rgba(192, 72, 130, 0.95) 65%,
+    rgba(192, 72, 130, 0.15)
+  );
+  pointer-events: none;
+}
+
+.auth-box--wide {
+  max-width: 480px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 28px;
 }
 
 .auth-title {
-  margin: 0;
-  font-size: 26px;
+  margin: 0 0 10px;
+  font-size: 32px;
+  line-height: 1.15;
   text-align: center;
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(200, 210, 230, 0.82);
+  max-width: 34ch;
+  margin-inline: auto;
+}
+
+.auth-error {
+  margin-bottom: 20px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .auth-field {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .auth-field label {
-  color: #ccc;
+  color: rgba(210, 218, 235, 0.92);
   font-size: 14px;
-  margin-bottom: 6px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
-.auth-field input {
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #333;
-  background: #121212;
-  color: white;
+.auth-field input,
+.auth-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.28);
+  color: #fff;
   outline: none;
-  transition: border-color 0.15s ease;
-  font-size: 15px;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+  font-size: 16px;
+  box-sizing: border-box;
 }
 
-.auth-field input:focus {
-  border-color: rgba(255, 138, 128, 0.55);
+.auth-field input::placeholder,
+.auth-input::placeholder {
+  color: rgba(180, 190, 210, 0.55);
+}
+
+.auth-field input:focus,
+.auth-input:focus {
+  border-color: rgba(255, 138, 128, 0.65);
+  background: rgba(0, 0, 0, 0.36);
+  box-shadow: 0 0 0 3px rgba(255, 138, 128, 0.12);
 }
 
 .auth-btn {
-  padding: 14px;
+  margin-top: 6px;
+  min-height: 52px;
+  padding: 14px 20px;
   border: none;
-  border-radius: 10px;
+  border-radius: 14px;
   background: linear-gradient(
     135deg,
-    rgba(255, 138, 128, 0.95),
-    rgba(192, 72, 130, 0.92)
+    rgba(255, 138, 128, 0.98),
+    rgba(192, 72, 130, 0.94)
   );
   color: white;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: filter 0.15s ease;
+  transition:
+    filter 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
   font-family: inherit;
+  box-shadow: 0 8px 24px rgba(192, 72, 130, 0.28);
 }
 
-.auth-btn:hover {
+.auth-btn:hover:not(:disabled) {
   filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(192, 72, 130, 0.34);
+}
+
+.auth-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-btn:disabled {
+  opacity: 1;
+  filter: grayscale(0.25) brightness(0.85);
+  cursor: wait;
+  transform: none;
+  box-shadow: none;
 }
 
 .auth-switch {
   color: rgba(230, 235, 245, 0.88);
-  margin: 0;
+  margin: 24px 0 0;
+  padding-top: 22px;
   text-align: center;
-  font-size: 14px;
+  font-size: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .auth-link {
@@ -89,4 +177,20 @@
 
 .auth-link:hover {
   color: #fff;
+}
+
+@media (max-width: 520px) {
+  .auth-box {
+    max-width: none;
+    padding: 36px 24px 28px;
+    border-radius: 20px;
+  }
+
+  .auth-title {
+    font-size: 28px;
+  }
+
+  .auth-subtitle {
+    font-size: 14px;
+  }
 }

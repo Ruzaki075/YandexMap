@@ -1,23 +1,24 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import MapHeader from "../Map/MapHeader";
 import { register } from "../../services/api";
+import { showToast } from "../ToastHost.jsx";
 import "./Auth.css";
 
 export default function Register() {
   const history = useHistory();
-  
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleRegister = async () => {
     if (!email.trim() || !password.trim()) {
       setError("Заполните все поля");
       return;
     }
-    
+
     if (password !== repeatPassword) {
       setError("Пароли не совпадают");
       return;
@@ -29,86 +30,104 @@ export default function Register() {
       return;
     }
 
-    
     if (password.length < 6) {
       setError("Пароль должен быть не менее 6 символов");
       return;
     }
 
-    setError(""); 
-    
+    setError("");
+    setSubmitting(true);
+
     try {
-      console.log("Пытаемся зарегистрировать:", email);
       const result = await register(email, password);
-      console.log("Регистрация успешна, результат:", result);
-      
       if (result && result.status === "success") {
-        alert("Регистрация успешна! Теперь войдите в систему.");
+        showToast("Регистрация успешна! Теперь войдите в систему.", "success");
         history.push("/login");
       } else {
         setError("Неизвестная ошибка при регистрации");
       }
     } catch (err) {
-      console.error("Ошибка регистрации:", err);
       setError(err.message || "Ошибка регистрации");
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  const onKeyDown = (e) => {
+    if (e.key === "Enter") handleRegister();
+  };
+
   return (
-    <>
-      <MapHeader />
+    <div className="auth-page auth-page--standalone page-aurora">
+      <div className="auth-box auth-box--wide">
+        <header className="auth-header">
+          <h1 className="auth-title">Регистрация</h1>
+          <p className="auth-subtitle">Создайте аккаунт, чтобы отмечать проблемы на карте</p>
+        </header>
 
-      <div className="auth-page page-aurora">
-        <div className="auth-box">
-          <h2 className="auth-title">Регистрация</h2>
-          
-          {error && <div className="auth-error">{error}</div>}
+        {error ? <div className="auth-error">{error}</div> : null}
 
+        <form
+          className="auth-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleRegister();
+          }}
+        >
           <div className="auth-field">
-            <label>Email</label>
+            <label htmlFor="reg-email">Email</label>
             <input
+              id="reg-email"
               type="email"
-              placeholder="Введите email"
+              autoComplete="email"
+              placeholder="name@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={onKeyDown}
               className="auth-input"
             />
           </div>
 
           <div className="auth-field">
-            <label>Пароль</label>
+            <label htmlFor="reg-password">Пароль</label>
             <input
+              id="reg-password"
               type="password"
-              placeholder="Введите пароль (минимум 6 символов)"
+              autoComplete="new-password"
+              placeholder="Минимум 6 символов"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={onKeyDown}
               className="auth-input"
             />
           </div>
 
           <div className="auth-field">
-            <label>Повторите пароль</label>
+            <label htmlFor="reg-repeat">Повторите пароль</label>
             <input
+              id="reg-repeat"
               type="password"
-              placeholder="Введите пароль ещё раз"
+              autoComplete="new-password"
+              placeholder="Ещё раз"
               value={repeatPassword}
               onChange={(e) => setRepeatPassword(e.target.value)}
+              onKeyDown={onKeyDown}
               className="auth-input"
             />
           </div>
 
-          <button className="auth-btn" onClick={handleRegister}>
-            Зарегистрироваться
+          <button type="submit" className="auth-btn" disabled={submitting}>
+            {submitting ? "Регистрация…" : "Зарегистрироваться"}
           </button>
+        </form>
 
-          <p className="auth-switch">
-            Уже есть аккаунт?{" "}
-            <Link className="auth-link" to="/login">
-              Войти
-            </Link>
-          </p>
-        </div>
+        <p className="auth-switch">
+          Уже есть аккаунт?{" "}
+          <Link className="auth-link" to="/login">
+            Войти
+          </Link>
+        </p>
       </div>
-    </>
+    </div>
   );
 }

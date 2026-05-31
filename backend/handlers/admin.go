@@ -9,12 +9,14 @@ import (
 
 	"backend/database"
 	"backend/middleware"
+	"backend/repositories"
 	"github.com/gorilla/mux"
 )
 
 type adminUserRow struct {
 	ID           int       `json:"id"`
 	Email        string    `json:"email"`
+	AvatarURL    string    `json:"avatar_url,omitempty"`
 	IsModerator  bool      `json:"is_moderator"`
 	IsAdmin      bool      `json:"is_admin"`
 	CreatedAt    time.Time `json:"created_at"`
@@ -28,7 +30,7 @@ func AdminListUsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rows, err := database.DB.Query(`
-		SELECT u.id, u.email, COALESCE(u.is_moderator, FALSE), COALESCE(u.is_admin, FALSE), u.created_at,
+		SELECT u.id, u.email, COALESCE(u.avatar_url, ''), COALESCE(u.is_moderator, FALSE), COALESCE(u.is_admin, FALSE), u.created_at,
 		       (SELECT COUNT(*) FROM markers m WHERE m.user_id = u.id)
 		FROM users u
 		ORDER BY u.id ASC
@@ -42,7 +44,7 @@ func AdminListUsersHandler(w http.ResponseWriter, r *http.Request) {
 	var list []adminUserRow
 	for rows.Next() {
 		var u adminUserRow
-		if err := rows.Scan(&u.ID, &u.Email, &u.IsModerator, &u.IsAdmin, &u.CreatedAt, &u.MarkersCount); err != nil {
+		if err := rows.Scan(&u.ID, &u.Email, &u.AvatarURL, &u.IsModerator, &u.IsAdmin, &u.CreatedAt, &u.MarkersCount); err != nil {
 			continue
 		}
 		list = append(list, u)
@@ -118,6 +120,12 @@ func AdminPatchUserHandler(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Database error")
 		return
 	}
+
+	actor := actorID
+	tid := targetID
+	repositories.InsertAuditLog(&actor, "user_roles_update", "user", &tid, map[string]interface{}{
+		"is_moderator": newMod, "is_admin": newAdm,
+	})
 
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{
 		"status":        "success",

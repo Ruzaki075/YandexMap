@@ -5,6 +5,8 @@
     {
       "key": "roads",
       "label_ru": "Дорожная сеть",
+      "marker_icon": "islands#redIcon",
+      "resolution_days": 15,
       "training_phrases_ru": [
         "на дороге большая яма",
         "разбитый асфальт провалился",
@@ -45,6 +47,8 @@
     {
       "key": "transit",
       "label_ru": "Городской транспорт",
+      "marker_icon": "islands#blueIcon",
+      "resolution_days": 21,
       "training_phrases_ru": [
         "нет остановки автобуса рядом с поликлиникой",
         "автобус ходит раз в сорок минут неудобно",
@@ -69,6 +73,8 @@
     {
       "key": "pedestrian",
       "label_ru": "Пешеходная среда",
+      "marker_icon": "islands#greenIcon",
+      "resolution_days": 14,
       "training_phrases_ru": [
         "высокий бордюр коляска не проезжает",
         "нет пандуса у подъезда",
@@ -93,6 +99,8 @@
     {
       "key": "utilities",
       "label_ru": "ЖКХ и инженерия",
+      "marker_icon": "islands#orangeIcon",
+      "resolution_days": 30,
       "training_phrases_ru": [
         "ливневка забита вода не уходит",
         "подтопляет подвал после каждого дождя",
@@ -119,6 +127,8 @@
     {
       "key": "social",
       "label_ru": "Социальная инфраструктура",
+      "marker_icon": "islands#violetIcon",
+      "resolution_days": 45,
       "training_phrases_ru": [
         "в районе не хватает мест в детском саду",
         "до ближайшей поликлиники пешком слишком далеко",

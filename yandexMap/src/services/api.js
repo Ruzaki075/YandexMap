@@ -139,6 +139,16 @@ export const getMarkers = async (params = {}) => {
     if (params.status != null && params.status !== "") {
       qs.set("status", String(params.status));
     }
+    if (params.layer != null && params.layer !== "") {
+      qs.set("layer", String(params.layer));
+    }
+    if (params.overdue === true || params.overdue === "1") {
+      qs.set("overdue", "1");
+    }
+    if (params.sw_lat != null) qs.set("sw_lat", String(params.sw_lat));
+    if (params.sw_lng != null) qs.set("sw_lng", String(params.sw_lng));
+    if (params.ne_lat != null) qs.set("ne_lat", String(params.ne_lat));
+    if (params.ne_lng != null) qs.set("ne_lng", String(params.ne_lng));
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
 
     const response = await fetch(`${API_URL}/markers${suffix}`);
@@ -224,6 +234,41 @@ export const markAllNotificationsRead = async () => {
   return response.json();
 };
 
+/** Пагинированный список для панели модерации (GET /api/moderation/markers) */
+export const getModerationMarkers = async (params = {}, { signal } = {}) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const qs = new URLSearchParams();
+  if (params.page != null && params.page > 0) qs.set("page", String(params.page));
+  if (params.page_size != null) qs.set("page_size", String(params.page_size));
+  if (params.status) qs.set("status", String(params.status));
+  if (params.category) qs.set("category", String(params.category));
+  if (params.overdue) qs.set("overdue", "1");
+  if (params.has_photo) qs.set("has_photo", "1");
+  if (params.many_supports) qs.set("many_supports", "1");
+  if (params.supports_min) qs.set("supports_min", String(params.supports_min));
+  if (params.unresolved) qs.set("unresolved", "1");
+  if (params.my_checks) qs.set("my_checks", "1");
+  if (params.q) qs.set("q", String(params.q));
+  if (params.sort) qs.set("sort", String(params.sort));
+  if (params.date_from) qs.set("date_from", String(params.date_from));
+  if (params.date_to) qs.set("date_to", String(params.date_to));
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  const response = await fetch(`${API_URL}/moderation/markers${suffix}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal,
+  });
+  if (response.status === 401 || response.status === 403) {
+    const t = await response.text();
+    throw new Error(t || "Нет прав модератора");
+  }
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Ошибка загрузки очереди");
+  }
+  return response.json();
+};
+
 /** Сводка для модерации/админа (GET /api/moderation/stats) */
 export const getModerationStats = async () => {
   const token = getToken();
@@ -238,6 +283,50 @@ export const getModerationStats = async () => {
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(errorText || "Ошибка статистики");
+  }
+  return response.json();
+};
+
+/** Жалобы пользователей для модерации (GET /api/moderation/abuse-reports) */
+export const getModerationAbuseReports = async (params = {}, { signal } = {}) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const qs = new URLSearchParams();
+  if (params.page != null && params.page > 0) qs.set("page", String(params.page));
+  if (params.page_size != null) qs.set("page_size", String(params.page_size));
+  if (params.status) qs.set("status", String(params.status));
+  if (params.reason) qs.set("reason", String(params.reason));
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  const response = await fetch(`${API_URL}/moderation/abuse-reports${suffix}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal,
+  });
+  if (response.status === 401 || response.status === 403) {
+    const t = await response.text();
+    throw new Error(t || "Нет прав модератора");
+  }
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Ошибка загрузки жалоб");
+  }
+  return response.json();
+};
+
+/** Закрыть жалобу: dismissed | actioned */
+export const patchModerationAbuseReport = async (id, status) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/moderation/abuse-reports/${id}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ status }),
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Ошибка обновления жалобы");
   }
   return response.json();
 };
@@ -311,7 +400,178 @@ export const postMarkerReview = async (markerId, { rating, comment = "" }) => {
   return response.json();
 };
 
-/** Смена статуса метки (модератор): pending | approved | rejected | resolved; moderator_note — опционально */
+export const listMarkerComments = async (markerId) => {
+  const response = await fetch(`${API_URL}/markers/${markerId}/comments`);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Ошибка загрузки обсуждения");
+  }
+  return response.json();
+};
+
+export const postMarkerComment = async (markerId, text) => {
+  const token = getToken();
+  if (!token) throw new Error("Войдите, чтобы писать в обсуждении.");
+  const response = await fetch(`${API_URL}/markers/${markerId}/comments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ text }),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Не удалось отправить комментарий");
+  }
+  return response.json();
+};
+
+export const getMapStats = async () => {
+  const response = await fetch(`${API_URL}/stats/map`);
+  if (!response.ok) {
+    throw new Error("Ошибка загрузки статистики");
+  }
+  return response.json();
+};
+
+export const patchMarkerText = async (markerId, text) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/markers/${markerId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ text }),
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    let msg = t;
+    try {
+      const j = JSON.parse(t);
+      if (j.error) msg = j.error;
+    } catch {
+      /* */
+    }
+    throw new Error(msg || "Не удалось сохранить");
+  }
+  return response.json();
+};
+
+export const getMarkerStatusHistory = async (markerId) => {
+  const response = await fetch(`${API_URL}/markers/${markerId}/status-history`);
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Ошибка загрузки истории");
+  }
+  return response.json();
+};
+
+export const getGeoSubscriptions = async () => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/geo-subscriptions`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Ошибка загрузки подписок");
+  }
+  return response.json();
+};
+
+export const createGeoSubscription = async (payload) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/geo-subscriptions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Не удалось создать подписку");
+  }
+  return response.json();
+};
+
+export const deleteGeoSubscription = async (id) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/geo-subscriptions/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Не удалось удалить");
+  }
+  return response.json();
+};
+
+export const deleteMarker = async (markerId) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/markers/${markerId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Не удалось удалить обращение");
+  }
+  return response.json();
+};
+
+/** Массовая смена статуса меток (модератор) */
+export const bulkPatchMarkerStatuses = async (ids, status, moderatorNote) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется авторизация модератора.");
+  const numericIds = (ids || [])
+    .map((id) => Number(id))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  if (numericIds.length === 0) {
+    throw new Error("Нет корректных id для массового действия.");
+  }
+  const body = { ids: numericIds, status };
+  if (moderatorNote != null && String(moderatorNote).trim() !== "") {
+    body.moderator_note = String(moderatorNote).trim();
+  }
+  let response;
+  try {
+    response = await fetch(`${API_URL}/moderation/markers/bulk-status`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    const msg = e?.message || String(e);
+    if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) {
+      throw new Error(
+        "Нет ответа от сервера (сеть или CORS). Откройте сайт тем же адресом, что в backend CORS (localhost и 127.0.0.1 — разные), проверьте VITE_API_URL и что API запущен."
+      );
+    }
+    throw e;
+  }
+  if (response.status === 401 || response.status === 403) {
+    const t = await response.text();
+    throw new Error(t || "Нет прав модератора");
+  }
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Массовое обновление не выполнено");
+  }
+  return response.json();
+};
+
 export const patchMarkerStatus = async (markerId, status, moderatorNote) => {
   const token = getToken();
   if (!token) {
@@ -341,42 +601,102 @@ export const patchMarkerStatus = async (markerId, status, moderatorNote) => {
 };
 
 export const createMarker = async (markerData) => {
-  try {
-    const token = getToken();
-    
-    if (!token) {
-      throw new Error("Требуется авторизация. Пожалуйста, войдите в систему.");
-    }
-
-    console.log("Отправляем запрос создания маркера с токеном:", token.substring(0, 20) + "...");
-
-    const response = await fetch(`${API_URL}/markers`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify(markerData),
-    });
-
-    console.log("Статус ответа создания маркера:", response.status);
-
-    if (response.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      throw new Error("Сессия истекла. Пожалуйста, войдите снова.");
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Ошибка при создании маркера: ${errorText}`);
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error("Ошибка в createMarker:", error);
-    throw error;
+  const token = getToken();
+  if (!token) {
+    throw new Error("Требуется авторизация. Пожалуйста, войдите в систему.");
   }
+
+  const response = await fetch(`${API_URL}/markers`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(markerData),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (response.status === 401) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    throw new Error("Сессия истекла. Пожалуйста, войдите снова.");
+  }
+
+  if (response.status === 409 && data.error === "nearby_exists") {
+    const err = new Error(
+      data.message || "Рядом уже есть похожие обращения."
+    );
+    err.code = "nearby_exists";
+    err.nearbyMarkers = data.nearby_markers || [];
+    throw err;
+  }
+
+  if (!response.ok) {
+    throw new Error(data.error || data.message || "Ошибка при создании маркера");
+  }
+
+  return data;
+};
+
+export const getMarkerSupports = async (markerId) => {
+  const response = await fetch(`${API_URL}/markers/${markerId}/supports`);
+  if (!response.ok) {
+    throw new Error("Не удалось загрузить поддержки");
+  }
+  return response.json();
+};
+
+export const postMarkerSupport = async (markerId) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/markers/${markerId}/supports`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || "Не удалось подтвердить");
+  }
+  return data;
+};
+
+export const deleteMarkerSupport = async (markerId) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/markers/${markerId}/supports`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || "Не удалось отменить");
+  }
+  return data;
+};
+
+export const getNearbyMarkers = async (lat, lng, radiusM = 100) => {
+  const q = new URLSearchParams({
+    lat: String(lat),
+    lng: String(lng),
+    radius_m: String(radiusM),
+  });
+  const response = await fetch(`${API_URL}/markers/nearby?${q}`);
+  if (!response.ok) throw new Error("Ошибка поиска рядом");
+  return response.json();
+};
+
+export const getHeatmapPoints = async (layer = "active") => {
+  const q = layer ? `?layer=${encodeURIComponent(layer)}` : "";
+  const response = await fetch(`${API_URL}/stats/heatmap${q}`);
+  if (!response.ok) throw new Error("Ошибка тепловой карты");
+  return response.json();
+};
+
+export const getLeaderboard = async () => {
+  const response = await fetch(`${API_URL}/leaderboard`);
+  if (!response.ok) throw new Error("Ошибка рейтинга");
+  return response.json();
 };
 
 export const uploadImage = async (file) => {
@@ -394,6 +714,7 @@ export const uploadImage = async (file) => {
 
     const response = await fetch(`${API_URL}/upload`, {
       method: "POST",
+      headers,
       body: formData,
     });
 
@@ -415,6 +736,181 @@ export const uploadImage = async (file) => {
     console.error("Ошибка в uploadImage:", error);
     throw error;
   }
+};
+
+/** Аватар профиля (JPG/PNG/WEBP/GIF, до 2 МБ) */
+export const uploadAvatar = async (file) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const formData = new FormData();
+  formData.append("image", file);
+  const response = await fetch(`${API_URL}/me/avatar`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    let msg = t;
+    try {
+      const j = JSON.parse(t);
+      if (j.error) msg = j.error;
+    } catch {
+      /* */
+    }
+    throw new Error(msg || "Не удалось загрузить аватар");
+  }
+  return response.json();
+};
+
+export const deleteAvatar = async () => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/me/avatar`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Не удалось удалить аватар");
+  }
+  return response.json();
+};
+
+/** Никнейм (display_name); пустая строка — сбросить. */
+export const patchMyProfile = async (displayName) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/me/profile`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ display_name: displayName }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || data.message || "Не удалось сохранить никнейм");
+  }
+  return data;
+};
+
+export const changePassword = async (oldPassword, newPassword) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/me/password`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      old_password: oldPassword,
+      new_password: newPassword,
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || data.message || "Не удалось сменить пароль");
+  }
+  return data;
+};
+
+/** Таксономия классификаций (направления + цвет меток) */
+export const getTaxonomy = async () => {
+  const response = await fetch(`${API_URL}/taxonomy`);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Ошибка загрузки классификаций");
+  }
+  return response.json();
+};
+
+/** Список классификаций для админки и модераторов */
+export const getAdminClassifications = async () => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/admin/classifications`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (response.status === 401 || response.status === 403) {
+    const t = await response.text();
+    throw new Error(t || "Нет прав модератора или администратора");
+  }
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Ошибка загрузки классификаций");
+  }
+  return response.json();
+};
+
+export const createAdminClassification = async (payload) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/admin/classifications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Не удалось создать классификацию");
+  }
+  return response.json();
+};
+
+export const patchAdminClassification = async (key, payload) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/admin/classifications/${encodeURIComponent(key)}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Не удалось обновить классификацию");
+  }
+  return response.json();
+};
+
+export const reorderAdminClassifications = async (keys) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/admin/classifications/reorder`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ keys }),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Не удалось сохранить порядок");
+  }
+  return response.json();
+};
+
+export const deleteAdminClassification = async (key) => {
+  const token = getToken();
+  if (!token) throw new Error("Требуется вход.");
+  const response = await fetch(`${API_URL}/admin/classifications/${encodeURIComponent(key)}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Не удалось удалить классификацию");
+  }
+  return response.json();
 };
 
 /** Список пользователей (только администратор) */
@@ -455,6 +951,127 @@ export const patchAdminUser = async (userId, payload) => {
     const errorText = await response.text();
     throw new Error(errorText || "Не удалось обновить пользователя");
   }
+  return response.json();
+};
+
+export const searchMarkers = async (q, limit = 40) => {
+  const qs = new URLSearchParams({ q, limit: String(limit) });
+  const response = await fetch(`${API_URL}/search?${qs}`);
+  if (!response.ok) throw new Error("Search failed");
+  return response.json();
+};
+
+export const getMarkerTimeline = async (markerId) => {
+  const response = await fetch(`${API_URL}/markers/${markerId}/timeline`);
+  if (!response.ok) throw new Error("Timeline failed");
+  return response.json();
+};
+
+export const getPublicProfile = async (userId) => {
+  const response = await fetch(`${API_URL}/users/${userId}/public`);
+  if (!response.ok) throw new Error("Profile not found");
+  return response.json();
+};
+
+export const getUserActivity = async (userId, year) => {
+  const qs = year ? `?year=${year}` : "";
+  const response = await fetch(`${API_URL}/users/${userId}/activity${qs}`);
+  if (!response.ok) throw new Error("Activity failed");
+  return response.json();
+};
+
+export const getAnalyticsDashboard = async (days = 30) => {
+  const response = await fetch(`${API_URL}/analytics/dashboard?days=${days}`);
+  if (!response.ok) throw new Error("Analytics failed");
+  return response.json();
+};
+
+export const getLeaderboardSeason = async (period = "week") => {
+  const response = await fetch(`${API_URL}/leaderboard/season?period=${period}`);
+  if (!response.ok) throw new Error("Leaderboard failed");
+  return response.json();
+};
+
+export const listFavorites = async () => {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/favorites`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("Favorites failed");
+  return response.json();
+};
+
+export const addFavorite = async (markerId) => {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/favorites`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ marker_id: markerId }),
+  });
+  if (!response.ok) throw new Error("Favorite failed");
+  return response.json();
+};
+
+export const removeFavorite = async (markerId) => {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/favorites/${markerId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("Unfavorite failed");
+  return response.json();
+};
+
+export const getFavoriteStatus = async (markerId) => {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/favorites/${markerId}/status`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) return { favorited: false };
+  return response.json();
+};
+
+export const postAbuseReport = async (payload) => {
+  const token = getToken();
+  if (!token) throw new Error("Войдите в аккаунт, чтобы отправить жалобу");
+  const response = await fetch(`${API_URL}/abuse-reports`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    throw new Error(t || "Не удалось отправить жалобу");
+  }
+  return response.json();
+};
+
+export const getAdminAuditLog = async (limit = 50) => {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/admin/audit-log?limit=${limit}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("Audit log failed");
+  return response.json();
+};
+
+export const patchMarkerMeta = async (markerId, payload) => {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/markers/${markerId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) throw new Error("Update failed");
   return response.json();
 };
 

@@ -147,5 +147,11 @@ func ModerationStatsHandler(w http.ResponseWriter, r *http.Request) {
 	var payload map[string]interface{}
 	_ = json.Unmarshal(raw, &payload)
 	payload["status"] = "success"
+	if abuseStats, err := repositories.AbuseReportStats(); err == nil {
+		payload["abuse_by_status"] = abuseStats
+		if abuseStats["open"] > 0 {
+			payload["abuse_open_count"] = abuseStats["open"]
+		}
+	}
 	respondWithJSON(w, http.StatusOK, payload)
 }

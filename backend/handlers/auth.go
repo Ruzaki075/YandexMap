@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"backend/database"
@@ -75,11 +76,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var hashedPassword string
 	var isModerator bool
 	var isAdmin bool
-	var createdAt time.Time
 	err := database.DB.QueryRow(
-		"SELECT id, password, COALESCE(is_moderator, FALSE), COALESCE(is_admin, FALSE), created_at FROM users WHERE email = $1",
+		`SELECT id, password, COALESCE(is_moderator, FALSE), COALESCE(is_admin, FALSE)
+		 FROM users WHERE email = $1`,
 		req.Email,
-	).Scan(&userID, &hashedPassword, &isModerator, &isAdmin, &createdAt)
+	).Scan(&userID, &hashedPassword, &isModerator, &isAdmin)
 
 	if err == sql.ErrNoRows {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
@@ -114,17 +115,16 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	user, err := LoadUserPublic(userID)
+	if err != nil {
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message": "Login successful",
 		"token":   tokenString,
-		"user": map[string]interface{}{
-			"id":            userID,
-			"email":         req.Email,
-			"is_moderator":  isModerator,
-			"is_admin":      isAdmin,
-			"created_at":    createdAt.UTC().Format(time.RFC3339),
-		},
-		"status": "success",
+		"user":    user,
+		"status":  "success",
 	})
 }
 
@@ -134,4 +134,104 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Logged out successfully",
 		"status":  "success",
 	})
+}
+
+// MeHandler — текущий пользователь и роли из БД + новый JWT (актуальные is_admin / is_moderator).
+func MeHandler(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	var email string
+	var isModerator, isAdmin bool
+	err := database.DB.QueryRow(
+		`SELECT email, COALESCE(is_moderator, FALSE), COALESCE(is_admin, FALSE)
+		 FROM users WHERE id = $1`,
+		userID,
+	).Scan(&email, &isModerator, &isAdmin)
+	if err == sql.ErrNoRows {
+		respondWithError(w, http.StatusNotFound, "User not found")
+		return
+	}
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Database error")
+		return
+	}
+
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &middleware.Claims{
+		UserID:      userID,
+		Email:       email,
+		IsModerator: isModerator,
+		IsAdmin:     isAdmin,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(middleware.JwtKey)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to generate token")
+		return
+	}
+
+	user, err := LoadUserPublic(userID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Database error")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"status": "success",
+		"token":  tokenString,
+		"user":   user,
+	})
+}
+
+// ChangePasswordHandler — смена пароля (требует JWT).
+func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	var req struct {
+		OldPassword string `json:"old_password"`
+		NewPassword string `json:"new_password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid JSON")
+		return
+	}
+	req.OldPassword = strings.TrimSpace(req.OldPassword)
+	req.NewPassword = strings.TrimSpace(req.NewPassword)
+	if req.OldPassword == "" || len(req.NewPassword) < 6 {
+		respondWithError(w, http.StatusBadRequest, "Укажите текущий пароль и новый (не короче 6 символов)")
+		return
+	}
+	var hashed string
+	err := database.DB.QueryRow(`SELECT password FROM users WHERE id = $1`, userID).Scan(&hashed)
+	if err == sql.ErrNoRows {
+		respondWithError(w, http.StatusNotFound, "User not found")
+		return
+	}
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Database error")
+		return
+	}
+	if bcrypt.CompareHashAndPassword([]byte(hashed), []byte(req.OldPassword)) != nil {
+		respondWithError(w, http.StatusUnauthorized, "Неверный текущий пароль")
+		return
+	}
+	newHash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), 14)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Server error")
+		return
+	}
+	if _, err := database.DB.Exec(`UPDATE users SET password = $1 WHERE id = $2`, string(newHash), userID); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Database error")
+		return
+	}
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{"status": "success", "message": "Пароль обновлён"})
 }

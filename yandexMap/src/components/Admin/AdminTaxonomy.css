@@ -1,0 +1,520 @@
+/* Admin taxonomy — compact card list, dark glass + coral accent */
+
+.admin-container--wide {
+  max-width: 1100px;
+}
+
+.tax-section {
+  margin-bottom: 2.5rem;
+}
+
+.tax-intro {
+  margin-bottom: 1rem;
+}
+
+.tax-intro code {
+  font-size: 0.9em;
+  color: #ffb4a9;
+}
+
+/* Toolbar */
+.tax-toolbar {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tax-toolbar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tax-toolbar__search {
+  flex: 1 1 180px;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.28);
+  color: #fff;
+  font-size: 14px;
+}
+
+.tax-toolbar__search:focus {
+  outline: none;
+  border-color: rgba(255, 107, 107, 0.55);
+  box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.15);
+}
+
+.tax-toolbar__sort {
+  flex: 0 1 auto;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.28);
+  color: #fff;
+  font-size: 13px;
+  max-width: 100%;
+}
+
+.tax-toolbar__order-on {
+  border-color: rgba(255, 107, 107, 0.5) !important;
+  color: #ff8a80 !important;
+}
+
+.tax-toolbar__meta {
+  margin: 0.5rem 0 0;
+  font-size: 12px;
+  color: var(--app-text-faint, #999);
+}
+
+/* List */
+.tax-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tax-list--scroll {
+  max-height: min(70vh, 720px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 107, 107, 0.35) transparent;
+}
+
+.tax-list--ordering .tax-card {
+  cursor: default;
+}
+
+.tax-list--ordering .tax-card__drag {
+  cursor: grab;
+  color: #ff8a80;
+}
+
+.tax-list__item--drag .tax-card {
+  opacity: 0.55;
+  outline: 1px dashed rgba(255, 107, 107, 0.5);
+}
+
+.tax-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--app-text-faint, #999);
+  font-size: 14px;
+}
+
+/* Card row */
+.tax-card {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  grid-template-areas:
+    "drag marker body actions";
+  align-items: center;
+  gap: 0.65rem 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.tax-card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.tax-card__drag {
+  grid-area: drag;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  font-size: 12px;
+  color: #666;
+  user-select: none;
+  touch-action: none;
+}
+
+.tax-list--ordering .tax-card__drag {
+  display: flex;
+}
+
+.tax-marker-preview {
+  grid-area: marker;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25),
+    0 1px 4px rgba(0, 0, 0, 0.45);
+  flex-shrink: 0;
+}
+
+.tax-marker-preview--lg {
+  width: 18px;
+  height: 18px;
+}
+
+.tax-card__body {
+  grid-area: body;
+  min-width: 0;
+}
+
+.tax-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.6rem;
+  margin-bottom: 0.2rem;
+}
+
+.tax-card__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.25;
+}
+
+.tax-card__key {
+  font-size: 11px;
+  color: var(--app-text-faint, #888);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.tax-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.tax-card__color-name {
+  font-size: 11px;
+  color: var(--app-text-faint, #999);
+}
+
+.tax-sla-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid rgba(255, 107, 107, 0.35);
+  color: #ffab91;
+  cursor: help;
+}
+
+/* Stats chips */
+.tax-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+}
+
+.tax-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  font-size: 11px;
+  color: var(--app-text-faint, #aaa);
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tax-stat strong {
+  font-size: 12px;
+  color: #e8e8e8;
+  font-weight: 600;
+}
+
+.tax-stat--ok strong {
+  color: #81c784;
+}
+
+.tax-stat--warn strong {
+  color: #ffb74d;
+}
+
+.tax-stat--warn {
+  background: rgba(255, 183, 77, 0.1);
+}
+
+/* Actions */
+.tax-card__actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.tax-card__actions .mod-action {
+  padding: 0.35rem 0.65rem;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Color picker (editor) */
+.tax-color-picker__preview-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.tax-color-picker__label {
+  display: block;
+  font-weight: 600;
+  color: #fff;
+  font-size: 14px;
+}
+
+.tax-color-picker__hex {
+  display: block;
+  font-size: 12px;
+  color: var(--app-text-faint, #999);
+  font-family: ui-monospace, monospace;
+}
+
+.tax-color-picker__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.tax-color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--swatch, #888);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s, border-color 0.12s;
+}
+
+.tax-color-swatch:hover:not(:disabled) {
+  transform: scale(1.08);
+}
+
+.tax-color-swatch--on {
+  border-color: #ff8a80;
+  box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.35);
+}
+
+.tax-color-warnings {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 12px;
+  color: #ffb74d;
+  line-height: 1.4;
+}
+
+/* Modal */
+.tax-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+.tax-modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 14px;
+  background: rgba(28, 28, 32, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+.tax-modal--sm {
+  max-width: 400px;
+}
+
+.tax-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem 0.5rem;
+}
+
+.tax-modal__head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.tax-modal__close {
+  border: none;
+  background: transparent;
+  color: #aaa;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+.tax-modal__close:hover {
+  color: #fff;
+}
+
+.tax-modal__form {
+  padding: 0 1.15rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.tax-modal__text,
+.tax-modal__warn {
+  padding: 0 1.15rem;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #ccc;
+}
+
+.tax-modal__warn {
+  color: #ffb74d;
+}
+
+.tax-modal__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1.15rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tax-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: 13px;
+  color: #bbb;
+}
+
+.tax-field legend {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 13px;
+  color: #bbb;
+  margin-bottom: 0.35rem;
+}
+
+.tax-field input,
+.tax-field textarea,
+.tax-field select {
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-size: 14px;
+}
+
+.tax-field input:focus,
+.tax-field textarea:focus {
+  outline: none;
+  border-color: rgba(255, 107, 107, 0.5);
+}
+
+.tax-field-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--app-text-faint, #999);
+}
+
+.tax-tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 11px;
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff8a80;
+  cursor: help;
+}
+
+.tax-sla-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.tax-sla-preset {
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  color: #ccc;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tax-sla-preset--on {
+  border-color: rgba(255, 107, 107, 0.5);
+  background: rgba(255, 107, 107, 0.15);
+  color: #ffab91;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .tax-toolbar__row .mod-action {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .tax-card {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "marker body"
+      "drag body"
+      "actions actions";
+  }
+
+  .tax-list--ordering .tax-card {
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas:
+      "drag marker body"
+      "actions actions actions";
+  }
+
+  .tax-card__actions {
+    justify-content: stretch;
+  }
+
+  .tax-card__actions .mod-action {
+    flex: 1;
+    text-align: center;
+  }
+}

@@ -71,7 +71,8 @@ func (r *PostgresReviewRepository) List(markerID int, limit, offset int) ([]mode
 		offset = 0
 	}
 	rows, err := database.DB.Query(`
-		SELECT r.id, r.marker_id, r.user_id, r.rating, r.comment, r.created_at, r.updated_at, COALESCE(u.email, '')
+		SELECT r.id, r.marker_id, r.user_id, r.rating, r.comment, r.created_at, r.updated_at,
+		       COALESCE(NULLIF(TRIM(u.display_name), ''), u.email, '')
 		FROM marker_reviews r
 		LEFT JOIN users u ON r.user_id = u.id
 		WHERE r.marker_id = $1
@@ -101,7 +102,8 @@ func (r *PostgresReviewRepository) GetUserReview(markerID, userID int) (*models.
 	var rev models.MarkerReview
 	var cmt sql.NullString
 	err := database.DB.QueryRow(`
-		SELECT r.id, r.marker_id, r.user_id, r.rating, r.comment, r.created_at, r.updated_at, COALESCE(u.email, '')
+		SELECT r.id, r.marker_id, r.user_id, r.rating, r.comment, r.created_at, r.updated_at,
+		       COALESCE(NULLIF(TRIM(u.display_name), ''), u.email, '')
 		FROM marker_reviews r
 		LEFT JOIN users u ON r.user_id = u.id
 		WHERE r.marker_id = $1 AND r.user_id = $2

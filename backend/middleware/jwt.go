@@ -78,3 +78,14 @@ func GetIsAdminFromContext(ctx context.Context) bool {
 	v, ok := ctx.Value(isAdminKey).(bool)
 	return ok && v
 }
+
+func ParseToken(tokenStr string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return JwtKey, nil
+	})
+	if err != nil || !token.Valid {
+		return nil, err
+	}
+	return claims, nil
+}

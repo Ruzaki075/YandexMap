@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"backend/database"
+	"backend/realtime"
+	"backend/repositories"
 	"backend/routes"
 
 	"github.com/gorilla/mux"
@@ -13,8 +15,13 @@ import (
 
 func main() {
 	database.ConnectDB()
+	realtime.Start()
+	repositories.SeedClassificationsIfEmpty()
 	defer database.DB.Close()
 
+	if err := os.MkdirAll("uploads/avatars", 0755); err != nil {
+		log.Printf("Failed to create uploads directory: %v", err)
+	}
 	if err := os.MkdirAll("uploads", 0755); err != nil {
 		log.Printf("Failed to create uploads directory: %v", err)
 	}

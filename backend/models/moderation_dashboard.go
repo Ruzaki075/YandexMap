@@ -17,4 +17,5 @@ type ModerationDashboard struct {
 	Resolved           int            `json:"resolved"`
 	Processed          int            `json:"processed"`
 	RejectionRate      *float64       `json:"rejection_rate,omitempty"`
+	OverdueCount       int            `json:"overdue_count"`
 }

@@ -4,3 +4,4 @@ const raw =
 
 export const API_ORIGIN = String(raw).replace(/\/$/, "");
 export const API_URL = `${API_ORIGIN}/api`;
+export const WS_URL = API_ORIGIN.replace(/^http/, "ws") + "/api/ws";
