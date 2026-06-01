@@ -1,0 +1,78 @@
+/* Общие стили статических страниц КартаПроблем */
+
+.kp-page {
+  min-height: 100%;
+  background: var(--color-bg, #0a0a0a);
+  color: var(--color-text, #eeeeee);
+  scroll-behavior: smooth;
+}
+
+.kp-page__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.kp-section-title {
+  margin: 0 0 20px;
+  padding-left: 14px;
+  border-left: 4px solid var(--color-primary, #cc0000);
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.kp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.kp-btn--primary {
+  background: linear-gradient(135deg, #cc0000, #990000);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(204, 0, 0, 0.35);
+}
+
+.kp-btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(204, 0, 0, 0.5);
+}
+
+.kp-btn--outline {
+  background: transparent;
+  color: var(--color-text, #eee);
+  border: 1px solid var(--color-border, #2a2a2a);
+}
+
+.kp-btn--outline:hover {
+  border-color: var(--color-primary, #cc0000);
+  color: #fff;
+}
+
+.kp-muted {
+  color: var(--color-text-secondary, #888);
+}
+
+@media (max-width: 768px) {
+  .kp-page__inner {
+    padding: 16px 14px 32px;
+  }
+
+  .kp-section-title {
+    font-size: 1.15rem;
+  }
+}

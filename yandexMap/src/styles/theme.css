@@ -1,0 +1,452 @@
+/* КартаПроблем — глобальная дизайн-система (все страницы) */
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body,
+#root {
+  background: #0a0a0a;
+  color: #eeeeee;
+}
+
+.app-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #0a0a0a;
+}
+
+.app-main {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: 60px;
+  box-sizing: border-box;
+  background: #0a0a0a;
+}
+
+.app-main--auth {
+  padding-top: 0;
+}
+
+.app-main--map {
+  padding-top: 60px;
+  height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ——— Скроллбар ——— */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f0f0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cc0000;
+  border-radius: 3px;
+}
+
+/* ——— Primary-кнопки ——— */
+.btn-primary,
+button.btn-primary,
+.auth-submit,
+.auth-btn,
+.map-sheet-btn--primary,
+.map-empty-hint-btn {
+  background: linear-gradient(135deg, #cc0000, #990000);
+  box-shadow: 0 4px 15px rgba(204, 0, 0, 0.35);
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.btn-primary:hover:not(:disabled),
+button.btn-primary:hover:not(:disabled),
+.auth-submit:hover:not(:disabled),
+.auth-btn:hover:not(:disabled),
+.map-sheet-btn--primary:hover:not(:disabled),
+.map-empty-hint-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(204, 0, 0, 0.5);
+}
+
+.btn-primary:disabled,
+.auth-submit:disabled,
+.auth-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ——— Outline-кнопки (сброс, слои) ——— */
+.btn-outline {
+  border: 1px solid #cc0000;
+  color: #cc0000;
+  background: transparent;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.btn-outline:hover {
+  background: rgba(204, 0, 0, 0.1);
+}
+
+/* ——— Поля ввода ——— */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+select,
+textarea,
+.auth-input {
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
+  color: #eeeeee;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):hover,
+select:hover,
+textarea:hover {
+  border-color: #444444;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: #cc0000;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.15);
+}
+
+/* ——— Карточки ——— */
+.kp-card,
+.glass-card,
+.profile-card,
+.notification-item,
+.leaderboard-row,
+.poll-card,
+.admin-card {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.kp-card:hover,
+.notification-item:hover,
+.leaderboard-row:hover {
+  border-color: #cc0000;
+}
+
+/* ——— Заголовки секций ——— */
+.kp-section-title,
+.section-title {
+  border-left: 3px solid #cc0000;
+  padding-left: 10px;
+  color: #ffffff;
+  font-weight: 700;
+  margin: 0 0 1rem;
+}
+
+/* ——— Ссылки ——— */
+a.kp-link,
+.auth-link,
+.page-back-link {
+  color: #cc0000;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+a.kp-link:hover,
+.auth-link:hover,
+.page-back-link:hover {
+  color: #ff3333;
+}
+
+/* ——— Иконки в хедере ——— */
+.header-icon {
+  color: #aaaaaa;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms ease;
+  background: transparent;
+  text-decoration: none;
+}
+
+.header-icon:hover {
+  color: #ffffff;
+  border-color: #cc0000;
+  background: rgba(204, 0, 0, 0.08);
+}
+
+.icon-bell-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #cc0000;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #1a1a1a;
+  line-height: 1;
+}
+
+.nav-icon {
+  color: #aaaaaa;
+  transition: color 150ms ease;
+}
+
+.nav-item:hover .nav-icon,
+.nav-item.active .nav-icon {
+  color: #cc0000;
+}
+
+.category-icon-wrap {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.category-icon-wrap svg {
+  color: #ffffff;
+}
+
+.fab-icon {
+  color: #ffffff;
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mapFab:hover .fab-icon {
+  transform: rotate(45deg);
+}
+
+/* ——— Кастомные чекбоксы / радио (сайдбар, список) ——— */
+.kp-check,
+.sidebar-check input[type="checkbox"],
+.list-radio input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #444444;
+  border-radius: 4px;
+  background: #1e1e1e;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  margin: 0;
+}
+
+.list-radio input[type="radio"] {
+  border-radius: 50%;
+}
+
+.kp-check:checked,
+.sidebar-check input[type="checkbox"]:checked {
+  background: #1e1e1e;
+  border-color: #cc0000;
+}
+
+.kp-check:checked::after,
+.sidebar-check input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid #cc0000;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.list-radio input[type="radio"]:checked {
+  border-color: #cc0000;
+}
+
+.list-radio input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  background: #cc0000;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ——— Логотип бренда ——— */
+.kp-logo {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.kp-logo-bar {
+  width: 4px;
+  flex-shrink: 0;
+  background: var(--color-primary, #cc0000);
+  border-radius: 2px;
+}
+
+.kp-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.kp-logo-line1 {
+  font-size: 11px;
+  color: #cc0000;
+  letter-spacing: 4px;
+  font-weight: 600;
+}
+
+.kp-logo-line2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+/* ——— Авторизация /login, /register ——— */
+.auth-page--karta {
+  background: #0a0a0a !important;
+  min-height: 100vh;
+}
+
+.auth-page--karta .auth-box {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 440px;
+}
+
+.auth-page--karta .auth-box::before {
+  display: none;
+}
+
+.auth-page--karta .auth-title {
+  color: #ffffff;
+  font-size: 1.5rem;
+}
+
+.auth-page--karta .auth-subtitle {
+  color: #888888;
+}
+
+.auth-page--karta .auth-field label {
+  color: #aaaaaa;
+}
+
+.auth-page--karta .auth-error {
+  background: rgba(204, 0, 0, 0.12);
+  border: 1px solid rgba(204, 0, 0, 0.35);
+  color: #ff6666;
+}
+
+.auth-logo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+/* ——— Панель инструментов карты (док) ——— */
+.map-dock-wrap {
+  background: #111111;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 8px 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.map-dock-toggle {
+  color: #666666 !important;
+  font-size: 12px !important;
+}
+
+.map-dock-tab,
+.map-dock-layer {
+  background: transparent !important;
+  color: #888888 !important;
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  transition: all 150ms ease !important;
+}
+
+.map-dock-tab.is-active,
+.map-dock-layer.is-active {
+  background: #cc0000 !important;
+  color: #ffffff !important;
+}
+
+.map-tools-bar {
+  background: #111111 !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 10px !important;
+  padding: 6px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+.map-tool-btn.is-active {
+  background: #cc0000 !important;
+  color: #ffffff !important;
+}
+
+.map-tool-btn:not(.is-active) {
+  color: #888888 !important;
+}
+
+/* ——— Страницы с aurora — тёмный фон ——— */
+.page-aurora.page-aurora--karta {
+  background: #0a0a0a;
+}
+
+.page-aurora.page-aurora--karta::before,
+.page-aurora.page-aurora--karta::after {
+  opacity: 0.15;
+}

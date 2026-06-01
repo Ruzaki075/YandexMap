@@ -1,0 +1,34 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.stats-card {
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: var(--app-glass-bg);
+  border: 1px solid var(--app-glass-border);
+  text-align: center;
+}
+
+.stats-card__num {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.stats-card__label {
+  font-size: 0.85rem;
+  color: var(--app-text-muted);
+}
+
+.stats-card--active .stats-card__num {
+  color: #7dd3fc;
+}
+
+.stats-card--resolved .stats-card__num {
+  color: #86efac;
+}

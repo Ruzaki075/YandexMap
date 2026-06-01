@@ -1,0 +1,79 @@
+.user-public-header {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.user-public-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-public-avatar--letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.user-public-stats {
+  margin: 8px 0;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+.user-public-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.user-public-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: rgba(255, 138, 128, 0.15);
+  border: 1px solid rgba(255, 138, 128, 0.35);
+  color: var(--app-accent-soft);
+}
+
+.activity-calendar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 24px;
+}
+
+.activity-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: #69f0ae;
+}
+
+.user-public-markers {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-public-markers li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.user-public-markers a {
+  color: var(--app-accent-soft);
+  text-decoration: none;
+  flex: 1;
+}

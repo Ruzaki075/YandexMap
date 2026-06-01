@@ -1,0 +1,2 @@
+ALTER USER postgres WITH PASSWORD 'Chernig007or';
+CREATE DATABASE yandexmap;

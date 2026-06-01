@@ -1,0 +1,36 @@
+.onboard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.onboard-panel {
+  max-width: 420px;
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: 14px;
+  background: var(--app-glass-bg);
+  border: 1px solid var(--app-glass-border);
+  color: #fff;
+}
+
+.onboard-panel h2 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
+
+.onboard-panel ul {
+  margin: 0 0 1.25rem;
+  padding-left: 1.2rem;
+  color: var(--app-text-muted);
+  line-height: 1.5;
+}
+
+.onboard-panel li + li {
+  margin-top: 0.4rem;
+}
