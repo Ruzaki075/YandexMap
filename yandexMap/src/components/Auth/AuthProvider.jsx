@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { API_URL } from "../../config.js";
+import { clearStoredAuth, isTokenExpired } from "../../utils/authToken.js";
 
 function readUserFromStorage() {
   const userStr = localStorage.getItem("user");
@@ -19,8 +20,17 @@ function readUserFromStorage() {
   }
 }
 
+function readInitialSession() {
+  const token = localStorage.getItem("token");
+  if (!token || token === "undefined" || token === "null" || isTokenExpired(token)) {
+    clearStoredAuth();
+    return null;
+  }
+  return readUserFromStorage();
+}
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => readUserFromStorage());
+  const [user, setUser] = useState(() => readInitialSession());
 
   const login = async (email, password) => {
     const res = await fetch(`${API_URL}/login`, {
@@ -47,15 +57,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    clearStoredAuth();
     setUser(null);
   };
 
   /** Актуальные роли из БД и новый JWT (после смены прав без повторного логина). */
   const refreshSession = async () => {
     const token = localStorage.getItem("token");
-    if (!token) return null;
+    if (!token || isTokenExpired(token)) {
+      logout();
+      return null;
+    }
     const res = await fetch(`${API_URL}/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -93,6 +105,13 @@ export const AuthProvider = ({ children }) => {
     }
     return null;
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token || isTokenExpired(token)) return;
+    refreshSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- один раз при старте
+  }, []);
 
   const updateUser = (patch) => {
     setUser((prev) => {

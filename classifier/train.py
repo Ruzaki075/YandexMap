@@ -26,6 +26,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder
 
@@ -106,8 +107,19 @@ def main() -> None:
         ]
     )
     pipe.fit(X_train, y_train)
+    y_pred = pipe.predict(X_test)
     acc = float(pipe.score(X_test, y_test))
     print(f"Hold-out accuracy (оценка): {acc:.3f}")
+    print()
+    print("Отчёт по классам (тестовая выборка, 15%):")
+    print(
+        classification_report(
+            y_test,
+            y_pred,
+            target_names=list(le.classes_),
+            digits=3,
+        )
+    )
 
     bundle = {
         "pipeline": pipe,
