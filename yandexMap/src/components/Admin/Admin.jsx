@@ -8,6 +8,7 @@ import React, {
 import { Link, useHistory } from "react-router-dom";
 import { AuthContext } from "../Auth/AuthContext.jsx";
 import { getAdminUsers, patchAdminUser } from "../../services/api.js";
+import { showToast } from "../ToastHost.jsx";
 import AdminClassifications from "./AdminClassifications.jsx";
 import "../Profile/Profile.css";
 import "../Moderation/Moderation.css";
@@ -19,6 +20,22 @@ function formatUserDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleString("ru-RU");
+}
+
+const USER_ROLES = [
+  { value: "user", label: "Пользователь", is_moderator: false, is_admin: false },
+  { value: "moderator", label: "Модератор", is_moderator: true, is_admin: false },
+  { value: "admin", label: "Администратор", is_moderator: true, is_admin: true },
+];
+
+function userRoleValue(u) {
+  if (u.is_admin) return "admin";
+  if (u.is_moderator) return "moderator";
+  return "user";
+}
+
+function userRoleLabel(u) {
+  return USER_ROLES.find((r) => r.value === userRoleValue(u))?.label || "Пользователь";
 }
 
 export default function Admin() {
@@ -90,31 +107,26 @@ export default function Admin() {
 
   const canManageUsers = Boolean(user?.is_admin);
 
-  const toggleModerator = async (u) => {
-    setBusyId(u.id);
-    setError("");
-    try {
-      await patchAdminUser(u.id, { is_moderator: !u.is_moderator });
-      await loadUsers();
-    } catch (e) {
-      setError(e.message || "Ошибка");
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const toggleAdmin = async (u) => {
-    if (u.id === user?.id && u.is_admin) {
+  const setUserRole = async (u, roleValue) => {
+    if (u.id === user?.id && roleValue !== "admin") {
       setError("Нельзя снять с себя права администратора через интерфейс.");
       return;
     }
+    const role = USER_ROLES.find((r) => r.value === roleValue);
+    if (!role || userRoleValue(u) === roleValue) return;
+
     setBusyId(u.id);
     setError("");
     try {
-      await patchAdminUser(u.id, { is_admin: !u.is_admin });
+      await patchAdminUser(u.id, {
+        is_moderator: role.is_moderator,
+        is_admin: role.is_admin,
+      });
       await loadUsers();
+      showToast(`Роль «${role.label}» назначена пользователю ${u.email}`, "success");
     } catch (e) {
       setError(e.message || "Ошибка");
+      showToast(e.message || "Не удалось сменить роль", "error");
     } finally {
       setBusyId(null);
     }
@@ -152,14 +164,12 @@ export default function Admin() {
             </div>
           </div>
 
-          <AdminClassifications />
-
           {canManageUsers && (
-          <section className="admin-section">
-            <h3>Пользователи</h3>
+          <section className="admin-section admin-section--users" id="admin-users">
+            <h3>Роли пользователей</h3>
             <p className="mod-intro admin-intro">
-              Модераторы обрабатывают обращения. После смены ролей пользователю
-              нужно заново войти в аккаунт.
+              Назначайте роли: пользователь, модератор или администратор. После
+              смены роли человеку нужно обновить страницу или войти заново.
             </p>
             {error && <div className="mod-alert">{error}</div>}
             <input
@@ -206,47 +216,45 @@ export default function Admin() {
                         </span>
                       </div>
                       <div className="admin-badges">
-                        {u.is_admin && (
-                          <span className="admin-badge admin-badge--gold">
-                            Админ
-                          </span>
-                        )}
-                        {u.is_moderator && (
-                          <span className="admin-badge admin-badge--mod">
-                            Модератор
-                          </span>
-                        )}
-                        {!u.is_admin && !u.is_moderator && (
-                          <span className="admin-badge admin-badge--user">
-                            Пользователь
-                          </span>
-                        )}
+                        <span
+                          className={`admin-badge ${
+                            u.is_admin
+                              ? "admin-badge--gold"
+                              : u.is_moderator
+                                ? "admin-badge--mod"
+                                : "admin-badge--user"
+                          }`}
+                        >
+                          {userRoleLabel(u)}
+                        </span>
                         <span className="admin-meta-muted">
                           Обращений: {u.markers_count ?? 0}
                         </span>
                       </div>
                       <div className="mod-review-actions admin-actions">
-                        <button
-                          type="button"
-                          className="mod-action mod-action--muted"
-                          disabled={busyId === u.id}
-                          onClick={() => toggleModerator(u)}
-                        >
-                          {u.is_moderator
-                            ? "Снять модератора"
-                            : "Сделать модератором"}
-                        </button>
-                        <button
-                          type="button"
-                          className="mod-action mod-action--ok"
-                          disabled={
-                            busyId === u.id ||
-                            (Boolean(u.is_admin) && u.id === user.id)
-                          }
-                          onClick={() => toggleAdmin(u)}
-                        >
-                          {u.is_admin ? "Снять админа" : "Сделать админом"}
-                        </button>
+                        <label className="admin-role-field">
+                          <span className="admin-role-label">Роль</span>
+                          <select
+                            className="admin-role-select"
+                            value={userRoleValue(u)}
+                            disabled={
+                              busyId === u.id ||
+                              (u.id === user?.id && u.is_admin)
+                            }
+                            onChange={(e) => setUserRole(u, e.target.value)}
+                          >
+                            {USER_ROLES.map((role) => (
+                              <option key={role.value} value={role.value}>
+                                {role.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        {u.id === user?.id && u.is_admin ? (
+                          <span className="admin-meta-muted admin-self-note">
+                            Свою роль администратора здесь не меняют
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -255,6 +263,8 @@ export default function Admin() {
             )}
           </section>
           )}
+
+          <AdminClassifications />
 
           {user.is_admin ? (
             <section className="admin-section">

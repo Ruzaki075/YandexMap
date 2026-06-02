@@ -189,13 +189,24 @@ function ModerationPreview({
           <p className="mod-v2-prose">{marker.text || "—"}</p>
         </div>
 
-        {(marker.image_url || marker.latitude != null) && (
+        {(marker.image_url || marker.image_after_url || marker.latitude != null) && (
           <div className="mod-v2-preview__media">
             {marker.image_url ? (
               <figure>
+                <figcaption className="mod-v2-media-caption">До</figcaption>
                 <img
                   src={`${API_ORIGIN}${marker.image_url}`}
-                  alt=""
+                  alt="Фото проблемы"
+                  loading="lazy"
+                />
+              </figure>
+            ) : null}
+            {marker.image_after_url ? (
+              <figure>
+                <figcaption className="mod-v2-media-caption">После (результат)</figcaption>
+                <img
+                  src={`${API_ORIGIN}${marker.image_after_url}`}
+                  alt="Фото после устранения"
                   loading="lazy"
                 />
               </figure>

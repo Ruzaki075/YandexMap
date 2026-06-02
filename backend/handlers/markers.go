@@ -287,7 +287,7 @@ func PatchMarkerHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // applyMarkerStatusUpdate — одна смена статуса: БД + журнал + уведомления владельцу + карма.
-func applyMarkerStatusUpdate(id int, status string, notePtr *string, actorUserID int) error {
+func applyMarkerStatusUpdate(id int, status string, notePtr *string, actorUserID int, imageAfterURL string) error {
 	repo := repositories.NewMarkerRepository()
 	ownerID, oldStatus, snippet, metaErr := repo.GetMarkerNotifyMeta(id)
 	if metaErr != nil {
@@ -296,17 +296,32 @@ func applyMarkerStatusUpdate(id int, status string, notePtr *string, actorUserID
 	if err := repo.UpdateStatus(id, status, notePtr); err != nil {
 		return err
 	}
+	imageAfterURL = strings.TrimSpace(imageAfterURL)
+	if imageAfterURL != "" && actorUserID > 0 {
+		if err := repo.UpdateMarkerMeta(id, actorUserID, imageAfterURL, ""); err != nil {
+			return err
+		}
+	}
 	var actorPtr *int
 	if actorUserID > 0 {
 		actorPtr = &actorUserID
 	}
 	_ = repositories.InsertMarkerStatusLog(id, oldStatus, status, actorPtr, notePtr)
 	_ = repositories.InsertMarkerChange(id, "status", oldStatus, status, actorPtr)
+	if imageAfterURL != "" {
+		_ = repositories.InsertMarkerChange(id, "image_after_url", "", imageAfterURL, actorPtr)
+	}
 	tid := id
-	repositories.InsertAuditLog(actorPtr, "marker_status_change", "marker", &tid, map[string]interface{}{
-		"old": oldStatus, "new": status,
-	})
-	broadcastMarkerUpdated(id, map[string]interface{}{"status": status})
+	auditPayload := map[string]interface{}{"old": oldStatus, "new": status}
+	if imageAfterURL != "" {
+		auditPayload["image_after_url"] = imageAfterURL
+	}
+	repositories.InsertAuditLog(actorPtr, "marker_status_change", "marker", &tid, auditPayload)
+	wsPayload := map[string]interface{}{"status": status}
+	if imageAfterURL != "" {
+		wsPayload["image_after_url"] = imageAfterURL
+	}
+	broadcastMarkerUpdated(id, wsPayload)
 	if ownerID > 0 {
 		services.HandleMarkerStatusChange(id, ownerID, oldStatus, status, notePtr, snippet)
 	}
@@ -327,6 +342,7 @@ func UpdateMarkerStatusHandler(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Status        string  `json:"status"`
 		ModeratorNote *string `json:"moderator_note"`
+		ImageAfterURL string  `json:"image_after_url"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid JSON")
@@ -352,7 +368,8 @@ func UpdateMarkerStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	actorID, _ := middleware.GetUserIDFromContext(r.Context())
-	if err := applyMarkerStatusUpdate(id, status, notePtr, actorID); err != nil {
+	imageAfterURL := strings.TrimSpace(body.ImageAfterURL)
+	if err := applyMarkerStatusUpdate(id, status, notePtr, actorID, imageAfterURL); err != nil {
 		if err == sql.ErrNoRows {
 			respondWithError(w, http.StatusNotFound, "Marker not found")
 			return
@@ -360,11 +377,15 @@ func UpdateMarkerStatusHandler(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Database error")
 		return
 	}
-	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+	resp := map[string]interface{}{
 		"status":        "success",
 		"id":            id,
 		"marker_status": status,
-	})
+	}
+	if imageAfterURL != "" {
+		resp["image_after_url"] = imageAfterURL
+	}
+	respondWithJSON(w, http.StatusOK, resp)
 }
 
 // BulkUpdateMarkerStatusHandler — массовая смена статуса (модератор/админ). До 100 id за запрос.
@@ -421,7 +442,7 @@ func BulkUpdateMarkerStatusHandler(w http.ResponseWriter, r *http.Request) {
 	var ok []int
 	var failed []map[string]interface{}
 	for _, id := range ids {
-		if err := applyMarkerStatusUpdate(id, status, notePtr, actorID); err != nil {
+		if err := applyMarkerStatusUpdate(id, status, notePtr, actorID, ""); err != nil {
 			failed = append(failed, map[string]interface{}{"id": id, "error": err.Error()})
 		} else {
 			ok = append(ok, id)

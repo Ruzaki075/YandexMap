@@ -10,11 +10,13 @@ import { useHistory } from "react-router-dom";
 import { AuthContext } from "../Auth/AuthContext.jsx";
 import {
   bulkPatchMarkerStatuses,
+  extractUploadedImageUrl,
   getModerationAbuseReports,
   getModerationMarkers,
   getModerationStats,
   patchMarkerStatus,
   patchModerationAbuseReport,
+  uploadImage,
 } from "../../services/api.js";
 import { useTaxonomy } from "../../hooks/useTaxonomy.js";
 import "../Profile/Profile.css";
@@ -74,6 +76,70 @@ function RejectDialog({ title, note, setNote, onCancel, onConfirm, busy }) {
   );
 }
 
+function ResolveDialog({
+  title,
+  previewUrl,
+  onPickFile,
+  onClearFile,
+  onCancel,
+  onConfirm,
+  busy,
+}) {
+  return (
+    <div className="mod-v2-overlay" role="presentation" onClick={onCancel}>
+      <div
+        className="mod-v2-dialog mod-v2-dialog--resolve"
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3>Отметить решённым</h3>
+        <p className="mod-v2-dialog__preview">{title}</p>
+        <p className="mod-v2-dialog__hint">
+          Прикрепите фото результата — как выглядит место после устранения проблемы
+          (необязательно, но рекомендуется).
+        </p>
+        {previewUrl ? (
+          <figure className="mod-v2-resolve-preview">
+            <img src={previewUrl} alt="Предпросмотр фото результата" />
+            <button
+              type="button"
+              className="mod-v2-btn mod-v2-btn--ghost mod-v2-resolve-clear"
+              onClick={onClearFile}
+              disabled={busy}
+            >
+              Убрать фото
+            </button>
+          </figure>
+        ) : (
+          <label className="mod-v2-resolve-upload">
+            <input
+              type="file"
+              accept="image/*"
+              disabled={busy}
+              onChange={onPickFile}
+            />
+            <span>Выбрать фото результата</span>
+          </label>
+        )}
+        <div className="mod-v2-dialog__actions">
+          <button type="button" className="mod-v2-btn mod-v2-btn--ghost" onClick={onCancel}>
+            Отмена
+          </button>
+          <button
+            type="button"
+            className="mod-v2-btn mod-v2-btn--ok"
+            disabled={busy}
+            onClick={onConfirm}
+          >
+            {busy ? "Сохранение…" : "Решено"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ModerationDashboard() {
   const { user } = useContext(AuthContext);
   const history = useHistory();
@@ -97,11 +163,39 @@ export default function ModerationDashboard() {
   const [bulkRejectNote, setBulkRejectNote] = useState("");
   const [spamRejectTarget, setSpamRejectTarget] = useState(null);
   const [spamRejectNote, setSpamRejectNote] = useState("");
+  const [resolveTarget, setResolveTarget] = useState(null);
+  const [resolveFile, setResolveFile] = useState(null);
+  const [resolvePreviewUrl, setResolvePreviewUrl] = useState(null);
 
   const isSpamTab = filters.tab === "spam";
   const abortRef = useRef(null);
   const listRef = useRef(null);
   const searchDebounceRef = useRef(null);
+
+  useEffect(() => {
+    if (!resolveFile) {
+      setResolvePreviewUrl(null);
+      return undefined;
+    }
+    const url = URL.createObjectURL(resolveFile);
+    setResolvePreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [resolveFile]);
+
+  const openResolveDialog = useCallback((marker) => {
+    setResolveTarget({
+      id: marker.id,
+      title: (marker.text || "").slice(0, 120),
+    });
+    setResolveFile(null);
+    setResolvePreviewUrl(null);
+  }, []);
+
+  const closeResolveDialog = useCallback(() => {
+    setResolveTarget(null);
+    setResolveFile(null);
+    setResolvePreviewUrl(null);
+  }, []);
 
   const domainOptions = useMemo(
     () => [
@@ -197,11 +291,11 @@ export default function ModerationDashboard() {
   );
 
   const patchStatus = useCallback(
-    async (id, status, note) => {
+    async (id, status, note, imageAfterUrl) => {
       setBusyId(id);
       setError("");
       try {
-        await patchMarkerStatus(id, status, note);
+        await patchMarkerStatus(id, status, note, imageAfterUrl);
         await loadQueue();
         window.dispatchEvent(new Event("yandexmap:notifications"));
       } catch (e) {
@@ -212,6 +306,28 @@ export default function ModerationDashboard() {
     },
     [loadQueue]
   );
+
+  const confirmResolve = useCallback(async () => {
+    if (!resolveTarget) return;
+    const id = resolveTarget.id;
+    setBusyId(id);
+    setError("");
+    try {
+      let imageAfterUrl = null;
+      if (resolveFile) {
+        const uploadResult = await uploadImage(resolveFile);
+        imageAfterUrl = extractUploadedImageUrl(uploadResult);
+      }
+      await patchMarkerStatus(id, "resolved", null, imageAfterUrl);
+      closeResolveDialog();
+      await loadQueue();
+      window.dispatchEvent(new Event("yandexmap:notifications"));
+    } catch (e) {
+      setError(e.message || "Ошибка");
+    } finally {
+      setBusyId(null);
+    }
+  }, [resolveTarget, resolveFile, closeResolveDialog, loadQueue]);
 
   const runBulk = async (status, note) => {
     if (!selectedIds.length) return;
@@ -248,7 +364,7 @@ export default function ModerationDashboard() {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (rejectTarget || bulkRejectOpen || spamRejectTarget) return;
+      if (rejectTarget || bulkRejectOpen || spamRejectTarget || resolveTarget) return;
       const tag = (e.target?.tagName || "").toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select") return;
 
@@ -293,7 +409,7 @@ export default function ModerationDashboard() {
       } else if (e.key === "x" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         if (["approved", "in_progress"].includes(normStatus(focusedMarker))) {
-          patchStatus(focusedMarker.id, "resolved");
+          openResolveDialog(focusedMarker);
         }
       }
     };
@@ -308,7 +424,9 @@ export default function ModerationDashboard() {
     rejectTarget,
     bulkRejectOpen,
     spamRejectTarget,
+    resolveTarget,
     patchStatus,
+    openResolveDialog,
   ]);
 
   if (!user?.is_moderator && !user?.is_admin) return null;
@@ -406,7 +524,7 @@ export default function ModerationDashboard() {
                   setRejectNote("");
                 }}
                 onInProgress={(m) => patchStatus(m.id, "in_progress")}
-                onResolved={(m) => patchStatus(m.id, "resolved")}
+                onResolved={openResolveDialog}
               />
             )}
           </div>
@@ -487,6 +605,22 @@ export default function ModerationDashboard() {
               setSpamRejectNote("");
             }
           }}
+        />
+      ) : null}
+
+      {resolveTarget ? (
+        <ResolveDialog
+          title={resolveTarget.title}
+          previewUrl={resolvePreviewUrl}
+          busy={busyId === resolveTarget.id}
+          onPickFile={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (file) setResolveFile(file);
+          }}
+          onClearFile={() => setResolveFile(null)}
+          onCancel={closeResolveDialog}
+          onConfirm={confirmResolve}
         />
       ) : null}
     </>

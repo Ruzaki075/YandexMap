@@ -1,4 +1,5 @@
 import { API_URL } from "../config.js";
+import { isTokenExpired } from "../utils/authToken.js";
 
 const CLASSIFIER_URL =
   import.meta.env.VITE_AI_CLASSIFIER_URL ||
@@ -36,12 +37,14 @@ export const classifyProblemImage = async (file, topK = 3) => {
 
 export const getToken = () => {
   const token = localStorage.getItem("token");
-  
+
   if (!token || token === "undefined" || token === "null") {
-    console.error("Токен не найден в localStorage");
     return null;
   }
-  
+  if (isTokenExpired(token)) {
+    return null;
+  }
+
   return token;
 };
 
@@ -572,7 +575,12 @@ export const bulkPatchMarkerStatuses = async (ids, status, moderatorNote) => {
   return response.json();
 };
 
-export const patchMarkerStatus = async (markerId, status, moderatorNote) => {
+export const patchMarkerStatus = async (
+  markerId,
+  status,
+  moderatorNote,
+  imageAfterUrl
+) => {
   const token = getToken();
   if (!token) {
     throw new Error("Требуется авторизация модератора.");
@@ -580,6 +588,9 @@ export const patchMarkerStatus = async (markerId, status, moderatorNote) => {
   const body = { status };
   if (moderatorNote != null && String(moderatorNote).trim() !== "") {
     body.moderator_note = String(moderatorNote).trim();
+  }
+  if (imageAfterUrl != null && String(imageAfterUrl).trim() !== "") {
+    body.image_after_url = String(imageAfterUrl).trim();
   }
   const response = await fetch(`${API_URL}/markers/${markerId}/status`, {
     method: "PATCH",

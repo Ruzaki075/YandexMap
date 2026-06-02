@@ -3,7 +3,6 @@ import { NavLink, useLocation } from "react-router-dom";
 import { AuthContext } from "../Auth/AuthContext.jsx";
 import { useUnreadNotifications } from "../../hooks/useUnreadNotifications.js";
 import {
-  IconAward,
   IconBell,
   IconCheck,
   IconPin,
@@ -125,14 +124,6 @@ export default function BottomNav() {
                 <NavLink to="/analytics" className="bottom-nav__sheet-link" role="menuitem">
                   <IconTrendingUp size={18} />
                   Аналитика
-                </NavLink>
-                <NavLink
-                  to="/leaderboard"
-                  className="bottom-nav__sheet-link"
-                  role="menuitem"
-                >
-                  <IconAward size={18} />
-                  Рейтинг
                 </NavLink>
                 {user?.is_admin ? (
                   <NavLink to="/admin" className="bottom-nav__sheet-link" role="menuitem">

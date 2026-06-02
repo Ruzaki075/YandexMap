@@ -28,26 +28,34 @@
 }
 
 .admin-user-row {
-  align-items: stretch;
+  align-items: center;
 }
 
 .admin-user-avatar {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  max-width: 48px;
+  max-height: 48px;
   font-size: 1.25rem;
   font-weight: 700;
   color: #fff;
   background: linear-gradient(135deg, #ffd54f, #ff8f00);
   border-radius: 12px;
-  min-width: 48px;
-  min-height: 48px;
   overflow: hidden;
 }
 
 .admin-user-avatar-img {
-  width: 100%;
-  height: 100%;
+  display: block;
+  width: 48px;
+  height: 48px;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: cover;
   border-radius: 12px;
 }
@@ -100,6 +108,44 @@
 
 .admin-actions {
   margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-role-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+}
+
+.admin-role-label {
+  font-size: 0.75rem;
+  color: rgba(161, 161, 170, 0.95);
+}
+
+.admin-role-select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font: inherit;
+}
+
+.admin-role-select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-self-note {
+  font-size: 0.8125rem;
+}
+
+.admin-section--users {
+  margin-bottom: 28px;
 }
 
 .admin-section {

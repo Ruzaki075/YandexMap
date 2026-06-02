@@ -338,9 +338,6 @@ export default function MapHeader() {
                 )}
                 Профиль
               </Link>
-              <Link to="/leaderboard" onClick={() => setMenuOpen(false)}>
-                Рейтинг
-              </Link>
               <button type="button" onClick={logout} className="nav-logout-btn">
                 Выйти
               </button>

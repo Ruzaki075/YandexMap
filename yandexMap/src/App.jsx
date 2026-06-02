@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Switch, useLocation } from "react-router-dom";
+import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import "./styles/theme.css";
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
@@ -8,7 +8,6 @@ import Profile from "./components/Profile/Profile";
 import Moderation from "./components/Moderation/Moderation";
 import Admin from "./components/Admin/Admin.jsx";
 import Notifications from "./components/Notifications/Notifications.jsx";
-import Leaderboard from "./components/Leaderboard/Leaderboard.jsx";
 import PublicStats from "./components/Stats/PublicStats.jsx";
 import AnalyticsDashboard from "./components/Analytics/AnalyticsDashboard.jsx";
 import UserPublic from "./components/User/UserPublic.jsx";
@@ -45,7 +44,9 @@ function AppRoutes() {
           <Route path="/moderation" component={Moderation} />
           <Route path="/notifications" component={Notifications} />
           <Route path="/profile" component={Profile} />
-          <Route path="/leaderboard" component={Leaderboard} />
+          <Route path="/leaderboard">
+            <Redirect to="/results" />
+          </Route>
           <Route path="/stats" component={PublicStats} />
           <Route path="/analytics" component={AnalyticsDashboard} />
           <Route path="/user/:id" component={UserPublic} />

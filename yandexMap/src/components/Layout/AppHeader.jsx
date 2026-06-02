@@ -22,7 +22,6 @@ function buildNav(user) {
   ];
   if (user) {
     items.push({ to: "/profile", label: "ПРОФИЛЬ" });
-    items.push({ to: "/leaderboard", label: "РЕЙТИНГ" });
     if (user.is_moderator || user.is_admin) {
       items.push({ to: "/moderation", label: "МОДЕРАЦИЯ" });
     }

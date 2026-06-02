@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"net/http"
@@ -23,9 +24,24 @@ type adminUserRow struct {
 	MarkersCount int       `json:"markers_count"`
 }
 
+func adminActorFromDB(ctx context.Context) (actorID int, isAdmin bool, ok bool) {
+	actorID, ok = middleware.GetUserIDFromContext(ctx)
+	if !ok {
+		return 0, false, false
+	}
+	err := database.DB.QueryRow(
+		`SELECT COALESCE(is_admin, FALSE) FROM users WHERE id = $1`, actorID,
+	).Scan(&isAdmin)
+	if err != nil {
+		return actorID, false, false
+	}
+	return actorID, isAdmin, true
+}
+
 // AdminListUsersHandler — список пользователей (только администратор).
 func AdminListUsersHandler(w http.ResponseWriter, r *http.Request) {
-	if !middleware.GetIsAdminFromContext(r.Context()) {
+	_, isAdmin, ok := adminActorFromDB(r.Context())
+	if !ok || !isAdmin {
 		respondWithError(w, http.StatusForbidden, "Admin only")
 		return
 	}
@@ -58,12 +74,12 @@ func AdminListUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 // AdminPatchUserHandler — смена ролей пользователя (только администратор).
 func AdminPatchUserHandler(w http.ResponseWriter, r *http.Request) {
-	actorID, ok := middleware.GetUserIDFromContext(r.Context())
+	actorID, isAdmin, ok := adminActorFromDB(r.Context())
 	if !ok {
 		respondWithError(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
-	if !middleware.GetIsAdminFromContext(r.Context()) {
+	if !isAdmin {
 		respondWithError(w, http.StatusForbidden, "Admin only")
 		return
 	}
@@ -111,6 +127,9 @@ func AdminPatchUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if body.IsAdmin != nil {
 		newAdm = *body.IsAdmin
+	}
+	if newAdm {
+		newMod = true
 	}
 
 	if _, err := database.DB.Exec(

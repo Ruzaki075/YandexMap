@@ -256,10 +256,6 @@ const Profile = () => {
                 <Link to="/notifications" className="profile-notif-link">
                   Уведомления →
                 </Link>
-                {" · "}
-                <Link to="/leaderboard" className="profile-notif-link">
-                  Рейтинг активистов →
-                </Link>
               </p>
             </div>
 
