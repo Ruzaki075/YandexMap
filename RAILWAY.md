@@ -20,11 +20,10 @@
 ## 3. Backend
 
 1. **New → GitHub Repo** → тот же репозиторий.
-2. **Settings → Build:**
-   - **Builder:** `Dockerfile`
-   - **Dockerfile Path:** `Dockerfile.backend` (файл в **корне** репо — Root Directory не нужен)
-   - **Watch Paths:** `/backend/**` (опционально)
-3. **Variables:**
+2. **Settings → Config-as-code:** файл **`railway.backend.toml`**
+3. **Settings → Build** (должно подтянуться из toml):
+   - **Dockerfile Path:** `Dockerfile.backend`
+4. **Variables:**
    | Переменная | Значение |
    |------------|----------|
    | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (reference из сервиса БД) |
@@ -35,9 +34,9 @@
 
 ## 4. Frontend
 
-1. **New → GitHub Repo** → тот же репозиторий.
-2. **Settings → Root Directory:** `.` (корень репозитория, не `yandexMap`!)
-3. **Settings → Dockerfile Path:** `yandexMap/Dockerfile.prod`
+1. **New → GitHub Repo** → тот же репозиторий (или уже есть YandexMap).
+2. **Settings → Config-as-code:** файл **`railway.frontend.toml`**
+3. **Settings → Build:** `yandexMap/Dockerfile.prod`
 4. **Variables** (важно: для Vite они нужны на этапе **сборки**):
    | Переменная | Значение |
    |------------|----------|
