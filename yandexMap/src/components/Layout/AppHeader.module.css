@@ -216,9 +216,27 @@
     font-size: 0.75rem;
   }
 
+  .headerMap .headerMapSearch,
+  .headerMap .headerMapNotif,
+  .headerMap .headerMapAvatar,
+  .headerMap .headerMapLogin {
+    display: none !important;
+  }
+
+  .headerMap .logo {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .headerMap .headerActions {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
   .headerMap .burger {
-    min-width: 40px;
-    min-height: 40px;
+    display: inline-flex !important;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .headerCompactMobile .logo :global(.kp-logo-line1) {
@@ -247,6 +265,21 @@
 
   .headerMap ~ .mobileNavOpen {
     top: calc(52px + env(safe-area-inset-top, 0));
-    max-height: calc(100dvh - 52px - env(safe-area-inset-top, 0));
+    bottom: 0;
+    max-height: none;
+    overflow-y: auto;
+    border-bottom: none;
+    padding: 0.5rem 0.75rem calc(1rem + env(safe-area-inset-bottom, 0));
+  }
+
+  .headerMap ~ .mobileNavOpen .navLink {
+    font-size: 14px;
+    padding: 0.85rem 0.65rem;
+    margin: 0;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .headerMap ~ .mobileNavOpen .navLink::after {
+    display: none;
   }
 }

@@ -925,6 +925,48 @@
   display: none;
 }
 
+/* Обёртка списка (десктоп — в потоке страницы) */
+.listSheetWrap {
+  flex: var(--main-list-flex) 1 0;
+  min-height: 300px;
+  max-height: 42vh;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.listSheetHeader,
+.sheetBackdrop,
+.mobileStatsChips,
+.mobileMapBar,
+.drawerFilters,
+.drawerHead,
+.drawerDateRow {
+  display: none;
+}
+
+.drawerFilters .filterSearchWrap {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.drawerFilters .resetBtn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.drawerDateRow {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.drawerDateRow .filterDate {
+  flex: 1;
+  min-width: 0;
+}
+
 /* Scrollbar */
 .page :global(::-webkit-scrollbar) {
   width: 6px;
@@ -1034,129 +1076,348 @@
     justify-content: center;
   }
 
+  /* ——— Карта на весь экран ——— */
   .statsBar {
-    flex-wrap: nowrap;
-    align-items: center;
-    height: auto;
-    min-height: 48px;
-    padding: 0.35rem 0.5rem;
-    gap: 0.35rem 0.5rem;
-  }
-
-  .statsTab {
     display: none;
   }
 
-  .statsCenter {
-    flex: 1;
-    min-width: 0;
-    justify-content: center;
-    gap: 0.75rem 1rem;
-  }
-
-  .statBlock {
-    gap: 0.35rem;
-  }
-
-  .statIcon svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .statNum {
-    font-size: 22px;
-  }
-
-  .statLabel {
-    font-size: 9px;
-    line-height: 1.2;
-  }
-
-  .statDivider {
-    display: none;
-  }
-
-  .reportBtn {
-    flex-shrink: 0;
-    width: auto;
-    max-width: 42%;
-    padding: 8px 10px;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    line-height: 1.2;
-    white-space: normal;
-    text-align: center;
-  }
-
-  .sidebar {
+  .filterRow {
     display: none;
   }
 
   .mobileCatsBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    margin: 0.35rem 0.5rem 0;
-    min-height: 40px;
-    font-size: 0.82rem;
+    display: none;
   }
 
   .page {
-    --main-map-flex: 1;
-    --main-list-flex: 1;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .workspace {
-    flex-direction: column;
-    flex: 1 1 48%;
+    flex: 1 1 auto;
     min-height: 0;
+    flex-direction: column;
   }
 
   .mainCol {
-    min-height: 0;
     flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .mapArea {
-    min-height: 0;
     flex: 1;
+    min-height: 0;
+    position: relative;
   }
 
   .mapInner :global(.map-tools) {
-    top: 8px;
+    top: 52px;
     bottom: auto;
     left: 8px;
     right: 8px;
   }
 
   .mapFab {
-    bottom: 12px;
-    right: 12px;
-    width: 48px;
-    height: 48px;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0));
+    right: 14px;
+    width: 50px;
+    height: 50px;
+    display: none;
   }
 
-  .listPanel {
-    flex: 1 1 42%;
-    min-height: 160px;
+  /* Компактная статистика поверх карты */
+  .mobileStatsChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    z-index: 7;
+    pointer-events: none;
+  }
+
+  .mobileStatChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(10, 10, 10, 0.88);
+    border: 1px solid rgba(204, 0, 0, 0.45);
+    color: #eee;
+    font-size: 11px;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: auto;
+  }
+
+  .mobileStatChip svg {
+    color: #cc0000;
+    flex-shrink: 0;
+  }
+
+  /* ——— Нижняя панель действий ——— */
+  .mobileMapBar {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 240;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0));
+    background: rgba(8, 8, 8, 0.96);
+    border-top: 1px solid #2a2a2a;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .mobileMapBarBtn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 52px;
+    padding: 6px 4px;
+    border: 1px solid #333;
+    border-radius: 10px;
+    background: #141414;
+    color: #ccc;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    font-family: inherit;
+  }
+
+  .mobileMapBarBtn svg {
+    color: #cc0000;
+  }
+
+  .mobileMapBarBtnPrimary {
+    flex: 1.15;
+    border-color: #cc0000;
+    background: linear-gradient(135deg, #cc0000, #990000);
+    color: #fff;
+  }
+
+  .mobileMapBarBtnPrimary svg {
+    color: #fff;
+  }
+
+  .mobileMapBarBadge {
+    position: absolute;
+    top: 4px;
+    right: calc(50% - 22px);
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #cc0000;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ——— Список сообщений (нижний sheet) ——— */
+  .listSheetWrap {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 260;
+    flex: none;
+    min-height: 0;
+    max-height: min(88dvh, calc(100dvh - 52px - env(safe-area-inset-top, 0)));
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    background: #0f0f0f;
+    border-radius: 16px 16px 0 0;
+    border-top: 2px solid #cc0000;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+  }
+
+  .listSheetWrapOpen {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .listSheetHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  .listSheetTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    border-left: 3px solid #cc0000;
+    padding-left: 10px;
+  }
+
+  .listSheetCount {
+    margin-left: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #888;
+  }
+
+  .listSheetClose {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 10px;
+    background: #222;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .listSheetWrap .listPanel {
+    flex: 1;
+    min-height: 0;
     max-height: none;
+    border-top: none;
   }
 
-  .listHead {
-    height: auto;
-    min-height: 40px;
-    padding: 0.35rem 12px;
+  .listSheetWrap .listHead {
+    display: none;
   }
 
-  .listTitle {
+  .listSheetWrap .listGrid {
+    grid-template-columns: 1fr;
+    padding: 10px 12px 8px;
+    gap: 10px;
+  }
+
+  .listSheetWrap .pagination {
+    padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0));
+  }
+
+  .sheetBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 255;
+    border: none;
+    background: rgba(0, 0, 0, 0.55);
+    cursor: pointer;
+  }
+
+  /* ——— Боковой drawer фильтров ——— */
+  .sidebar {
+    display: none;
+  }
+
+  .drawerFilters {
+    display: block;
+    padding: 0 12px 8px;
+  }
+
+  .drawerHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 12px 8px;
+    border-bottom: 1px solid #2a2a2a;
+    margin-bottom: 4px;
+  }
+
+  .drawerHeadTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    border-left: 3px solid #cc0000;
+    padding-left: 10px;
+  }
+
+  .drawerDateRow {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+  }
+
+  .drawerFilters .filterSearch {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  .drawerFilters .filterDate {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
     font-size: 14px;
   }
 
-  .listGrid {
-    grid-template-columns: 1fr;
-    padding: 10px 12px 12px;
-    gap: 10px;
+  .drawerFilters .resetBtn {
+    min-height: 44px;
+  }
+
+  .drawerBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+    background: rgba(0, 0, 0, 0.55);
+    border: none;
+  }
+
+  .drawer {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(300px, 90vw);
+    z-index: 200;
+    background: var(--color-sidebar-bg);
+    overflow-y: auto;
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .drawer .sidebar {
+    display: block;
+    width: 100%;
+    border: none;
+  }
+
+  .drawerClose {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: static;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: none;
+    border-radius: 8px;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
   }
 
   .card {
@@ -1186,122 +1447,8 @@
     font-size: 10px;
   }
 
-  .pagination {
-    height: auto;
-    min-height: 44px;
-    padding: 0.25rem 0.5rem calc(0.25rem + env(safe-area-inset-bottom, 0));
-    flex-wrap: wrap;
-  }
-
   .pagination button {
     min-width: 36px;
     height: 36px;
-  }
-
-  .filterRow {
-    flex-wrap: wrap;
-    height: auto;
-    min-height: 0;
-    padding: 0.35rem 0.5rem;
-    gap: 0.35rem;
-  }
-
-  .filterSearchWrap {
-    flex: 1 1 100%;
-    width: 100%;
-  }
-
-  .filterSearch {
-    font-size: 16px;
-    min-height: 40px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-
-  .filterDate {
-    flex: 1 1 calc(50% - 1.25rem);
-    width: auto;
-    min-width: 0;
-    min-height: 40px;
-    font-size: 14px;
-  }
-
-  .filterDateSep {
-    flex: 0 0 auto;
-    align-self: center;
-  }
-
-  .resetBtn {
-    flex: 1 1 100%;
-    justify-content: center;
-    min-height: 40px;
-  }
-
-  .drawerBackdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 199;
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
-  }
-
-  .drawer {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: min(280px, 88vw);
-    z-index: 200;
-    background: var(--color-sidebar-bg);
-    overflow-y: auto;
-    padding-top: env(safe-area-inset-top, 0);
-    padding-bottom: env(safe-area-inset-bottom, 0);
-  }
-
-  .drawer .sidebar {
-    display: block;
-    width: 100%;
-    border: none;
-  }
-
-  .drawerClose {
-    display: block;
-    position: absolute;
-    top: calc(8px + env(safe-area-inset-top, 0));
-    right: 8px;
-    z-index: 1;
-    width: 2.25rem;
-    height: 2.25rem;
-    border: none;
-    border-radius: 6px;
-    background: #333;
-    color: #fff;
-    cursor: pointer;
-  }
-}
-
-@media (max-width: 380px) {
-  .statNum {
-    font-size: 20px;
-  }
-
-  .statLabel {
-    display: none;
-  }
-
-  .reportBtn {
-    max-width: 38%;
-    padding: 7px 8px;
-    font-size: 9px;
-  }
-
-  .filterDateSep {
-    display: none;
-  }
-
-  .filterDate {
-    flex: 1 1 100%;
   }
 }

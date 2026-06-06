@@ -79,11 +79,14 @@ export default function AppHeader() {
           {isMap ? (
             <button
               type="button"
-              className={styles.headerIconBtn}
+              className={`${styles.headerIconBtn} ${styles.headerMapSearch}`}
               aria-label="Поиск на карте"
-              onClick={() =>
-                document.getElementById("main-map-search")?.focus()
-              }
+              onClick={() => {
+                document.getElementById("main-map-search")?.focus();
+                document
+                  .getElementById("main-map-search")
+                  ?.scrollIntoView({ block: "nearest" });
+              }}
             >
               <IconSearch size={20} />
             </button>
@@ -91,14 +94,18 @@ export default function AppHeader() {
           {user ? (
             <Link
               to="/notifications"
-              className={styles.headerIconBtn}
+              className={`${styles.headerIconBtn} ${styles.headerMapNotif}`}
               aria-label="Уведомления"
             >
               <IconBellWithBadge count={unreadCount} size={22} />
             </Link>
           ) : null}
           {user ? (
-            <Link to="/profile" className={styles.headerAvatar} aria-label="Профиль">
+            <Link
+              to="/profile"
+              className={`${styles.headerAvatar} ${styles.headerMapAvatar}`}
+              aria-label="Профиль"
+            >
               {resolveAvatarUrl(user.avatar_url) ? (
                 <img src={resolveAvatarUrl(user.avatar_url)} alt="" />
               ) : (
@@ -108,7 +115,7 @@ export default function AppHeader() {
           ) : (
             <button
               type="button"
-              className={styles.headerLogin}
+              className={`${styles.headerLogin} ${styles.headerMapLogin}`}
               onClick={() => history.push("/login")}
             >
               Войти
@@ -129,6 +136,15 @@ export default function AppHeader() {
       {menuOpen ? (
         <nav className={styles.mobileNavOpen} aria-label="Мобильное меню">
           {renderLinks()}
+          {user ? (
+            <Link
+              to="/notifications"
+              className={styles.navLink}
+              onClick={() => setMenuOpen(false)}
+            >
+              УВЕДОМЛЕНИЯ{unreadCount > 0 ? ` (${unreadCount})` : ""}
+            </Link>
+          ) : null}
           {!user ? (
             <Link
               to="/login"
