@@ -450,3 +450,22 @@ a.kp-link:hover,
 .page-aurora.page-aurora--karta::after {
   opacity: 0.15;
 }
+
+@media (max-width: 768px) {
+  .app-main {
+    padding-top: calc(56px + env(safe-area-inset-top, 0));
+  }
+
+  .app-main--map {
+    padding-top: calc(56px + env(safe-area-inset-top, 0));
+  }
+
+  .kp-logo-line1 {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+
+  .kp-logo-line2 {
+    font-size: 17px;
+  }
+}

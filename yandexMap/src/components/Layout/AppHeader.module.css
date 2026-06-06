@@ -139,6 +139,16 @@
     display: inline-flex;
   }
 
+  .header {
+    padding: 0 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .headerLogin {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.55rem;
+  }
+
   .mobileNavOpen {
     display: flex;
     flex-direction: column;
@@ -156,5 +166,17 @@
   .mobileNavOpen .navLink {
     padding: 0.65rem 0.5rem;
     font-size: 13px;
+  }
+}
+
+/* На внутренних страницах навигация — в BottomNav */
+@media (max-width: 768px) {
+  .headerCompactMobile .burger {
+    display: none !important;
+  }
+
+  .headerCompactMobile + nav,
+  .headerCompactMobile ~ nav {
+    display: none !important;
   }
 }

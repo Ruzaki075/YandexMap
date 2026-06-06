@@ -75,7 +75,11 @@ docker compose up --build
 
 Подробнее: [DOCKER.md](DOCKER.md)
 
-Остановка:
+## Деплой на Railway
+
+Пошаговая инструкция: [RAILWAY.md](RAILWAY.md)
+
+Остановка Docker:
 
 ```bash
 docker compose down

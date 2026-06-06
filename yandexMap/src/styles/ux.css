@@ -237,3 +237,153 @@ a.add-first-btn,
   font-size: 12px;
   white-space: nowrap;
 }
+
+/* ——— Внутренние страницы: отступ под BottomNav ——— */
+@media (max-width: 768px) {
+  .page-aurora {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0) + 16px);
+    box-sizing: border-box;
+  }
+
+  .page-aurora .profile-container,
+  .page-aurora .admin-container,
+  .page-aurora .admin-container--wide {
+    padding: 20px 16px !important;
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .profile-quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .profile-quick-btn {
+    min-height: 64px;
+    font-size: 0.75rem;
+  }
+
+  .notif-page {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .notif-page-item {
+    padding: 12px 14px;
+  }
+
+  .user-public-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+  }
+
+  .user-public-markers li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .analytics-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .analytics-kpi {
+    padding: 12px 8px;
+  }
+
+  .analytics-kpi__n {
+    font-size: 1.25rem;
+  }
+
+  .analytics-bars {
+    height: 120px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .stats-card__num {
+    font-size: 1.65rem;
+  }
+
+  .admin-user-row {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .admin-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-role-field {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .admin-class-form-actions {
+    flex-direction: column;
+  }
+
+  .admin-class-form-actions .action-btn {
+    width: 100%;
+  }
+
+  .admin-user-search {
+    max-width: none;
+  }
+
+  .polls-container {
+    padding: 0.75rem 14px 2rem;
+  }
+
+  .polls-filters {
+    flex-direction: column;
+  }
+
+  .polls-filters select {
+    width: 100%;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .geo-picker-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .geo-picker-panel {
+    width: 100%;
+    max-height: 92dvh;
+    border-radius: 16px 16px 0 0;
+    padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom, 0));
+  }
+
+  .geo-picker-map {
+    height: min(45vh, 320px);
+  }
+
+  .geo-picker-actions {
+    flex-direction: column-reverse;
+  }
+
+  .geo-picker-actions button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .onboard-panel {
+    max-height: min(90dvh, 520px);
+    overflow-y: auto;
+  }
+
+  .auth-page--karta .auth-box {
+    padding: 28px 20px 24px;
+    margin: 0 12px;
+    border-radius: 14px;
+  }
+}

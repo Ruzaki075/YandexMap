@@ -64,7 +64,9 @@ export default function AppHeader() {
 
   return (
     <>
-      <header className={styles.header}>
+      <header
+        className={`${styles.header}${!isMap ? ` ${styles.headerCompactMobile}` : ""}`}
+      >
         <KpLogo to="/" className={styles.logo} />
 
         <nav className={styles.nav} aria-label="Основная навигация">

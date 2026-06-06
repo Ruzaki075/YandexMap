@@ -61,6 +61,12 @@ func corsMiddleware(next http.Handler) http.Handler {
 func SetupRoutes(r *mux.Router) {
 	r.Use(corsMiddleware)
 
+	r.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
+	}).Methods("GET")
+
 	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
 
 	r.HandleFunc("/api/register", handlers.RegisterHandler).Methods("POST", "OPTIONS")

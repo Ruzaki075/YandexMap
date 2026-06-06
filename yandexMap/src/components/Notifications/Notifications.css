@@ -75,3 +75,27 @@
   font-size: 12px;
   color: var(--app-text-faint);
 }
+
+@media (max-width: 768px) {
+  .notif-page .mod-section-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .notif-page .mod-head-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .notif-page .mod-head-actions .mod-refresh,
+  .notif-page .mod-head-actions .view-all {
+    width: 100%;
+    min-height: 44px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

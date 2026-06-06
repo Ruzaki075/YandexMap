@@ -29,7 +29,11 @@ func main() {
 	r := mux.NewRouter()
 	routes.SetupRoutes(r)
 
-	port := ":8080"
-	log.Printf("Server running on http://localhost%s", port)
-	log.Fatal(http.ListenAndServe(port, r))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	addr := ":" + port
+	log.Printf("Server running on http://0.0.0.0%s", addr)
+	log.Fatal(http.ListenAndServe(addr, r))
 }
