@@ -183,17 +183,34 @@
     height: calc(52px + env(safe-area-inset-top, 0));
   }
 
+  .headerMap .logo {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: visible;
+  }
+
+  .headerMap .logo :global(.kp-logo) {
+    gap: 8px;
+    min-width: 0;
+  }
+
   .headerMap .logo :global(.kp-logo-line1) {
-    display: none;
+    display: block;
+    font-size: 9px;
+    letter-spacing: 2px;
+    line-height: 1.15;
   }
 
   .headerMap .logo :global(.kp-logo-line2) {
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.5px;
+    line-height: 1.15;
   }
 
   .headerMap .logo :global(.kp-logo-bar) {
-    height: 22px;
+    width: 3px;
+    align-self: stretch;
+    min-height: 26px;
   }
 
   .headerMap .headerActions {
@@ -223,11 +240,6 @@
     display: none !important;
   }
 
-  .headerMap .logo {
-    flex: 1;
-    min-width: 0;
-  }
-
   .headerMap .headerActions {
     flex-shrink: 0;
     margin-left: auto;
@@ -240,11 +252,22 @@
   }
 
   .headerCompactMobile .logo :global(.kp-logo-line1) {
-    display: none;
+    display: block;
+    font-size: 9px;
+    letter-spacing: 2px;
+    line-height: 1.15;
   }
 
   .headerCompactMobile .logo :global(.kp-logo-line2) {
-    font-size: 16px;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+  }
+
+  .headerCompactMobile .logo :global(.kp-logo-bar) {
+    width: 3px;
+    align-self: stretch;
+    min-height: 26px;
   }
 
   .headerCompactMobile .burger {
