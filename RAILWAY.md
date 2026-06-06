@@ -20,9 +20,11 @@
 ## 3. Backend
 
 1. **New → GitHub Repo** → тот же репозиторий.
-2. **Settings → Root Directory:** `backend`
-3. **Settings → Build:** Dockerfile (`backend/Dockerfile`, задаётся в `backend/railway.toml`).
-4. **Variables:**
+2. **Settings → Build:**
+   - **Builder:** `Dockerfile`
+   - **Dockerfile Path:** `Dockerfile.backend` (файл в **корне** репо — Root Directory не нужен)
+   - **Watch Paths:** `/backend/**` (опционально)
+3. **Variables:**
    | Переменная | Значение |
    |------------|----------|
    | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (reference из сервиса БД) |
