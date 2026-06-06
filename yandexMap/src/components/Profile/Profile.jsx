@@ -673,23 +673,29 @@ function PasswordSettingsBlock() {
       </div>
       <p className="profile-geo-hint">Смена пароля учётной записи.</p>
       <div className="geo-subs-form password-settings-form">
-        <input
-          type="password"
-          placeholder="Текущий пароль"
-          value={oldPw}
-          onChange={(e) => setOldPw(e.target.value)}
-          autoComplete="current-password"
-        />
-        <input
-          type="password"
-          placeholder="Новый пароль"
-          value={newPw}
-          onChange={(e) => setNewPw(e.target.value)}
-          autoComplete="new-password"
-        />
+        <label className="password-settings-label">
+          <span className="password-settings-label-text">Текущий пароль</span>
+          <input
+            type="password"
+            placeholder="Текущий пароль"
+            value={oldPw}
+            onChange={(e) => setOldPw(e.target.value)}
+            autoComplete="current-password"
+          />
+        </label>
+        <label className="password-settings-label">
+          <span className="password-settings-label-text">Новый пароль</span>
+          <input
+            type="password"
+            placeholder="Новый пароль (от 6 символов)"
+            value={newPw}
+            onChange={(e) => setNewPw(e.target.value)}
+            autoComplete="new-password"
+          />
+        </label>
         <button
           type="button"
-          className="action-btn primary"
+          className="action-btn primary password-settings-btn"
           disabled={busy}
           onClick={submit}
         >
