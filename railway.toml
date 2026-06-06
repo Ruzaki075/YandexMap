@@ -1,0 +1,11 @@
+# Frontend only. Backend service MUST use railway.backend.toml in Config-as-code.
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "yandexMap/Dockerfile.prod"
+watchPatterns = ["yandexMap/**", "issue-taxonomy.json"]
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
