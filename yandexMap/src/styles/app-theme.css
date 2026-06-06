@@ -1,0 +1,163 @@
+/* КартаПроблем — глобальные CSS-переменные */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+/* Единая чёрная тема (светлая/тёмная переключалка не меняет фон) */
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+  --color-primary: #cc0000;
+  --color-primary-dark: #990000;
+  --color-primary-light: #ff3333;
+  --color-accent: #cc0000;
+  --color-bg: #0a0a0a;
+  --color-surface: #111111;
+  --color-surface-2: #1a1a1a;
+  --color-sidebar-bg: #0a0a0a;
+  --color-sidebar-text: #eeeeee;
+  --color-sidebar-text-secondary: #888888;
+  --color-sidebar-active: #cc0000;
+  --color-sidebar-hover: #1a1a1a;
+  --color-text: #eeeeee;
+  --color-text-secondary: #999999;
+  --color-border: #2a2a2a;
+  --color-resolved: #81c784;
+  --color-in-progress: #ffb74d;
+  --color-pending: #aaaaaa;
+  --color-cluster: #cc0000;
+  --color-stats-bar: #0a0a0a;
+  --color-shadow: rgba(0, 0, 0, 0.5);
+
+  --app-bg-deep: #0a0a0a;
+  --app-text: #eeeeee;
+  --app-text-muted: #999999;
+  --app-text-faint: #666666;
+  --app-glass-bg: #111111;
+  --app-glass-border: #2a2a2a;
+  --app-line: #2a2a2a;
+  --app-accent-soft: #cc0000;
+  --app-accent-strong: #990000;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Внутренние страницы — только чёрный фон, без декора */
+.page-aurora {
+  position: relative;
+  overflow: hidden;
+  animation: none !important;
+  background: #0a0a0a !important;
+  color: var(--app-text);
+}
+
+.page-aurora::before,
+.page-aurora::after {
+  display: none !important;
+}
+
+.page-aurora :focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.page-aurora > * {
+  position: relative;
+  z-index: 1;
+}
+
+.page-aurora .profile-container,
+.page-aurora .auth-box {
+  background: var(--app-glass-bg);
+  border: 1px solid var(--app-glass-border);
+  box-shadow: 0 4px 24px var(--color-shadow);
+}
+
+.page-aurora .profile-container {
+  border-radius: 8px;
+}
+
+.page-aurora .auth-box {
+  border-radius: 8px;
+}
+
+.page-aurora .action-btn.primary,
+.page-aurora .auth-btn,
+.page-aurora .add-first-btn {
+  background: var(--color-primary);
+  border-color: transparent;
+  color: #fff;
+}
+
+.page-aurora .action-btn.primary:hover,
+.page-aurora .auth-btn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.page-aurora .action-btn {
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.page-aurora .action-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.page-aurora .stat-card {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+}
+
+.page-aurora .mark-item {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+}
+
+.page-aurora .view-all,
+.page-aurora .auth-link {
+  color: var(--color-primary);
+}
+
+.page-aurora .logout-btn {
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.page-aurora .logout-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.page-aurora .profile-loading .loading-spinner,
+.page-aurora .loading-spinner {
+  border-color: var(--color-border) !important;
+  border-top-color: var(--color-primary) !important;
+}
+
+.page-aurora .auth-field input {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.page-aurora .auth-field input:focus {
+  border-color: var(--color-primary);
+}
+
+.page-aurora .auth-error {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  border: 1px solid var(--color-primary);
+  color: var(--color-text);
+}
+
+.page-aurora.leaderboard-page .leaderboard-rank {
+  color: var(--color-primary);
+}
+
+.page-aurora.leaderboard-page .leaderboard-back {
+  color: var(--color-primary);
+}

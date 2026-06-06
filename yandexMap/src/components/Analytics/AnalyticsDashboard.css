@@ -1,0 +1,74 @@
+.analytics-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.analytics-kpi {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
+}
+
+.analytics-kpi__n {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.analytics-kpi--warn .analytics-kpi__n {
+  color: #f87171;
+}
+
+.analytics-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 140px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.analytics-bar-wrap {
+  flex: 1;
+  min-width: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.analytics-bar {
+  width: 100%;
+  max-width: 24px;
+  min-height: 4px;
+  background: linear-gradient(to top, #ff8a80, #f06292);
+  border-radius: 4px 4px 0 0;
+  margin-top: auto;
+}
+
+.analytics-bar-label {
+  font-size: 0.6rem;
+  color: var(--app-text-faint);
+  margin-top: 4px;
+  transform: rotate(-45deg);
+}
+
+.analytics-cats {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.analytics-cats li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}

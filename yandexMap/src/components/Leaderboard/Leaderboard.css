@@ -1,0 +1,75 @@
+.leaderboard-page {
+  width: 100%;
+}
+
+.leaderboard-main {
+  max-width: 560px;
+}
+
+.leaderboard-sub {
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+  margin: 0 0 20px;
+}
+
+.leaderboard-err {
+  color: #f87171;
+}
+
+.leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.leaderboard-rank {
+  font-weight: 700;
+  min-width: 28px;
+}
+
+.leaderboard-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.leaderboard-avatar--letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.leaderboard-email--link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.leaderboard-email--link:hover {
+  text-decoration: underline;
+}
+
+.leaderboard-email {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaderboard-karma {
+  font-weight: 600;
+  color: #fbbf24;
+}

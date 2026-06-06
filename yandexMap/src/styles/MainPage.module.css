@@ -1,0 +1,1138 @@
+/* КартаПроблем — главная страница (портал «Москва — Наш город») */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0a0a;
+  color: var(--color-text);
+  font-family: "Inter", system-ui, sans-serif;
+  /* Доля высоты: карта / список сообщений (умеренно больше списка) */
+  --main-map-flex: 58;
+  --main-list-flex: 42;
+}
+
+/* ——— Header 60px ——— */
+.header {
+  flex-shrink: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem;
+  background: #1a1a1a;
+  border-bottom: 2px solid var(--color-primary);
+  z-index: 100;
+}
+
+.logo {
+  composes: kp-logo from global;
+  flex-shrink: 0;
+  padding-left: 4px;
+}
+
+.nav {
+  display: flex;
+  gap: 0.25rem;
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
+}
+
+.navLink {
+  position: relative;
+  padding: 0.5rem 4px;
+  margin: 0 0.35rem;
+  color: #aaaaaa;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  border-bottom: none;
+  transition: color 150ms ease;
+}
+
+.navLink::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 0;
+  height: 2px;
+  background: var(--color-primary);
+  transform: scaleX(0);
+  transition: transform 200ms ease;
+}
+
+.navLink:hover {
+  color: #ffffff;
+}
+
+.navLink:hover::after {
+  transform: scaleX(1);
+}
+
+.navLinkActive {
+  color: #ffffff;
+}
+
+.navLinkActive::after {
+  transform: scaleX(1);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.headerIconBtn {
+  composes: header-icon from global;
+  width: auto;
+  height: auto;
+  min-width: 34px;
+  min-height: 34px;
+  position: relative;
+}
+
+.notifBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.2rem;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerAvatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #333;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+.headerAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.headerLogin {
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-primary);
+  background: transparent;
+  color: var(--color-primary-light);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.burger {
+  display: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 6px;
+  background: #2a2a2a;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ——— Stats bar 56px ——— */
+.statsBar {
+  flex-shrink: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 1rem;
+  background: var(--color-stats-bar);
+  border-bottom: 1px solid var(--color-primary);
+}
+
+.statsTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--color-primary);
+  white-space: nowrap;
+}
+
+.statsTab svg {
+  color: #cc0000;
+}
+
+.statsCenter {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.statBlock {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.statIcon {
+  display: flex;
+  align-items: center;
+  color: #cc0000;
+  flex-shrink: 0;
+}
+
+.statNum {
+  display: block;
+  font-size: 28px;
+  font-weight: 800;
+  color: #cc0000;
+  line-height: 1;
+}
+
+.statDivider {
+  width: 1px;
+  height: 36px;
+  background: #333333;
+  flex-shrink: 0;
+}
+
+.statLabel {
+  display: block;
+  font-size: 11px;
+  color: var(--color-sidebar-text-secondary);
+  margin-top: 2px;
+}
+
+.reportBtn {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #cc0000, #990000);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(204, 0, 0, 0.4);
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.reportBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(204, 0, 0, 0.6);
+}
+
+/* ——— Workspace (карта) ——— */
+.workspace {
+  flex: var(--main-map-flex) 1 0;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--color-sidebar-bg);
+  border-right: 1px solid #2a2a2a;
+  overflow-y: auto;
+  padding-bottom: 1rem;
+}
+
+.sidebarTitle {
+  margin: 0;
+  padding: 20px 16px 8px 24px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-sidebar-text-secondary);
+  border-left: 2px solid #cc0000;
+  margin-left: 16px;
+  padding-left: 8px;
+}
+
+.catItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: var(--color-sidebar-text);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 150ms ease;
+}
+
+.catItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.catItemActive {
+  border-left-color: #cc0000;
+  background: linear-gradient(90deg, rgba(204, 0, 0, 0.15), transparent);
+}
+
+.catIcon {
+  composes: category-icon-wrap from global;
+}
+
+.catLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.catCount {
+  font-size: 12px;
+  color: var(--color-sidebar-text-secondary);
+  background: #2a2a2a;
+  border-radius: 10px;
+  padding: 2px 7px;
+  min-width: 1.25rem;
+  text-align: center;
+}
+
+.sidebarDivider {
+  border: none;
+  border-top: 1px solid #2a2a2a;
+  margin: 12px 16px;
+}
+
+.checkRow {
+  composes: sidebar-check from global;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  font-size: 13px;
+  color: var(--color-sidebar-text);
+  cursor: pointer;
+}
+
+/* Режим карты: активные / решённые / все + теплокарта */
+.mapLayerGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 16px 12px;
+}
+
+.mapLayerRow {
+  display: flex;
+  gap: 4px;
+}
+
+.mapLayerBtn {
+  flex: 1;
+  padding: 8px 4px;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  background: transparent;
+  color: #888888;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.mapLayerBtn:hover {
+  border-color: #cc0000;
+  color: #eeeeee;
+}
+
+.mapLayerBtnActive {
+  background: #cc0000;
+  border-color: #cc0000;
+  color: #ffffff;
+}
+
+.heatmapBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  background: transparent;
+  color: #888888;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.heatmapBtn:hover {
+  border-color: #cc0000;
+  color: #eeeeee;
+}
+
+.heatmapBtnOn {
+  background: rgba(204, 0, 0, 0.2);
+  border-color: #cc0000;
+  color: #ff6666;
+}
+
+.mainCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.mobileCatsBtn {
+  display: none;
+  margin: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.filterRow {
+  flex-shrink: 0;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  background: #111111;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.filterSearchWrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filterSearchIcon {
+  position: absolute;
+  left: 10px;
+  color: #cc0000;
+  pointer-events: none;
+  display: flex;
+}
+
+.filterSearch {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 7px 12px 7px 34px;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  background: #1e1e1e;
+  color: #eeeeee;
+  font-size: 13px;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.filterSearch:focus {
+  outline: none;
+  border-color: #cc0000;
+  box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.15);
+}
+
+.filterSelect,
+.filterDate {
+  width: 140px;
+  padding: 7px 12px;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  background: #1e1e1e;
+  color: #eeeeee;
+  font-size: 13px;
+}
+
+.filterSelect:hover,
+.filterDate:hover,
+.filterSearch:hover {
+  border-color: #cc0000;
+}
+
+.filterDate {
+  width: 130px;
+}
+
+.filterDateSep {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.resetBtn {
+  composes: btn-outline from global;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+.heatOn {
+  background: rgba(204, 0, 0, 0.2);
+  color: #ff6666;
+}
+
+.mapArea {
+  flex: 1;
+  position: relative;
+  min-height: 280px;
+  overflow: hidden;
+}
+
+.mapInner {
+  position: absolute;
+  inset: 0;
+}
+
+.mapInner :global(.map-ymaps-layer) {
+  position: absolute;
+  inset: 0;
+}
+
+.mapInner :global(.map-ymaps-layer) > div {
+  width: 100%;
+  height: 100%;
+}
+
+.mapInner :global(.map-tools) {
+  position: absolute;
+  bottom: 72px;
+  left: 12px;
+  z-index: 8;
+}
+
+.mapInner :global(.map-empty-hint) {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+  max-width: 90%;
+  padding: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.mapFab {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 10;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #cc0000, #ff1a1a);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(204, 0, 0, 0.5);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mapFab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(204, 0, 0, 0.7);
+}
+
+.mapFab:hover :global(.fab-icon) {
+  transform: rotate(45deg);
+}
+
+/* ——— Список сообщений (основная зона) ——— */
+.listPanel {
+  flex: var(--main-list-flex) 1 0;
+  min-height: 300px;
+  max-height: 42vh;
+  display: flex;
+  flex-direction: column;
+  background: #0f0f0f;
+  border-top: 2px solid var(--color-primary);
+}
+
+.listHead {
+  flex-shrink: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.listHeadLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.listTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  border-left: 3px solid #cc0000;
+  padding-left: 10px;
+}
+
+.listCount {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.listHeadFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  justify-content: flex-end;
+}
+
+.inlineCheck {
+  composes: list-radio from global;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 11px;
+  color: #888888;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.inlineCheck:has(input:checked) {
+  color: #eeeeee;
+}
+
+.listGrid {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  align-content: start;
+}
+
+
+.listEmpty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: 2rem;
+  font-size: 0.9rem;
+}
+
+.card {
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 14px 16px;
+  cursor: pointer;
+  background: #1a1a1a;
+  transition: all 150ms ease;
+}
+
+.card:hover {
+  border-color: #cc0000;
+  box-shadow: 0 0 0 1px rgba(204, 0, 0, 0.3);
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.cardCatIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.cardAddress {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 0;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  color: #cc0000;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+.cardAddress:hover {
+  text-decoration: underline;
+}
+
+.cardReport {
+  border: none;
+  background: none;
+  color: #666;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  display: flex;
+}
+
+.cardReport:hover {
+  color: #cc0000;
+}
+
+.cardStar {
+  border: none;
+  background: none;
+  color: #555555;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  display: flex;
+}
+
+.cardStarOn {
+  color: #cc0000;
+}
+
+.cardSub {
+  margin: 4px 0 8px 40px;
+  font-size: 12px;
+  color: #888888;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardLikes {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #aaaaaa;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cardLikesHot {
+  border-color: rgba(204, 0, 0, 0.45);
+  color: #ff8a80;
+  background: rgba(204, 0, 0, 0.1);
+}
+
+.cardAuthor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #cc0000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.cardAuthorText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+
+.cardDate {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.statusBadge {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusBadge_in_progress {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #e65100;
+}
+
+.statusBadge_resolved {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #2e7d32;
+}
+
+.statusBadge_pending,
+.statusBadge_approved {
+  background: rgba(204, 0, 0, 0.15);
+  color: #ff6666;
+  border: 1px solid rgba(204, 0, 0, 0.4);
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.statusBadge_rejected {
+  background: #ffebee;
+  color: #cc0000;
+  border: 1px solid #cc0000;
+}
+
+[data-theme="dark"] .statusBadge_in_progress {
+  background: #2a1a0a;
+  color: #ffb74d;
+  border-color: #e65100;
+}
+
+[data-theme="dark"] .statusBadge_resolved {
+  background: #0d2818;
+  color: #81c784;
+  border-color: #2e7d32;
+}
+
+[data-theme="dark"] .statusBadge_pending,
+[data-theme="dark"] .statusBadge_approved {
+  background: #1f1f1f;
+  color: #aaa;
+  border-color: #555;
+}
+
+[data-theme="dark"] .statusBadge_rejected {
+  background: #2a0f0f;
+  color: #ff6666;
+  border-color: #cc0000;
+}
+
+.pagination {
+  flex-shrink: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.pagination button {
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: var(--color-surface-2);
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pageActive {
+  background: var(--color-primary) !important;
+  color: #fff !important;
+  border-color: var(--color-primary) !important;
+}
+
+.pageEllipsis {
+  padding: 0 0.25rem;
+  color: var(--color-text-secondary);
+}
+
+/* Drawer mobile */
+.drawerBackdrop {
+  display: none;
+}
+
+.drawer {
+  display: none;
+}
+
+.drawerClose {
+  display: none;
+}
+
+/* Scrollbar */
+.page :global(::-webkit-scrollbar) {
+  width: 6px;
+  height: 6px;
+}
+
+.page :global(::-webkit-scrollbar-track) {
+  background: var(--color-bg);
+}
+
+.page :global(::-webkit-scrollbar-thumb) {
+  background: var(--color-primary);
+  border-radius: 3px;
+}
+
+/* ——— Mobile ——— */
+/* Bottom sheets поверх портала */
+:global(.map-sheet-backdrop) {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+:global(.map-bottom-sheet) {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 310;
+  max-height: min(90vh, 720px);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -8px 32px var(--color-shadow);
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--color-text);
+}
+
+:global(.map-bottom-sheet.is-open) {
+  transform: translateY(0);
+}
+
+:global(.map-sheet-handle) {
+  width: 2.5rem;
+  height: 4px;
+  margin: 0.65rem auto 0.35rem;
+  border-radius: 999px;
+  background: var(--color-border);
+}
+
+:global(.map-sheet-scroll) {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 1rem 1rem;
+}
+
+:global(.map-sheet-actions) {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+:global(.map-sheet-btn--primary) {
+  flex: 1;
+  padding: 0.65rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+:global(.map-sheet-btn--outline) {
+  flex: 1;
+  padding: 0.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+:global(.loading-overlay) {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--color-text);
+}
+
+@media (max-width: 768px) {
+  .nav {
+    display: none;
+  }
+
+  .burger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .statsBar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 56px;
+    padding: 0.5rem;
+  }
+
+  .statsCenter {
+    width: 100%;
+    order: 2;
+    justify-content: space-around;
+  }
+
+  .reportBtn {
+    width: 100%;
+    order: 3;
+    margin-top: 0.35rem;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .mobileCatsBtn {
+    display: block;
+  }
+
+  .page {
+    --main-map-flex: 52;
+    --main-list-flex: 48;
+  }
+
+  .workspace {
+    flex-direction: column;
+  }
+
+  .mapArea {
+    min-height: 32vh;
+  }
+
+  .listPanel {
+    min-height: 260px;
+    max-height: 46vh;
+  }
+
+  .listGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .filterRow {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 0.5rem;
+  }
+
+  .filterSelect,
+  .filterDate {
+    width: calc(50% - 0.25rem);
+  }
+
+  .drawerBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+  }
+
+  .drawer {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(280px, 88vw);
+    z-index: 200;
+    background: var(--color-sidebar-bg);
+    overflow-y: auto;
+  }
+
+  .drawer .sidebar {
+    display: block;
+    width: 100%;
+    border: none;
+  }
+
+  .drawerClose {
+    display: block;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: 6px;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+  }
+}

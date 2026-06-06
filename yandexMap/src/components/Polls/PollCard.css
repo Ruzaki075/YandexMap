@@ -1,0 +1,117 @@
+.poll-card {
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.poll-card--compact {
+  padding: 0.75rem 0.85rem;
+  max-width: 320px;
+}
+
+.poll-card--voted {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+}
+
+.poll-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.poll-card-title {
+  margin: 0;
+  font-size: 1rem;
+  flex: 1;
+}
+
+.poll-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.poll-card-cat {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.3);
+}
+
+.poll-card-desc {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  opacity: 0.85;
+}
+
+.poll-card-meta {
+  margin: 0 0 0.65rem;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.poll-card-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.poll-card-option-btn {
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.poll-card-option-btn:hover:not(:disabled) {
+  border-color: #818cf8;
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.poll-card-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.poll-card-result {
+  margin-bottom: 0.55rem;
+}
+
+.poll-card-result-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  margin-bottom: 0.2rem;
+}
+
+.poll-card-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.poll-card-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  transition: width 0.5s ease;
+}
+
+.poll-card--loading {
+  opacity: 0.7;
+  font-size: 0.85rem;
+}
