@@ -1524,26 +1524,6 @@ const YandexMap = () => {
 
         {!loading &&
         !showHeatmap &&
-        placemarks.length === 0 ? (
-          <div className="map-empty-hint" role="status">
-            <p>На карте нет обращений для слоя «{mapLayer === "resolved" ? "Решённые" : mapLayer === "all" ? "Все" : "Активные"}».</p>
-            <p className="map-empty-hint-sub">
-              Новые заявки со статусом «На проверке» видны только вам после отправки.
-            </p>
-            {mapLayer !== "all" ? (
-              <button
-                type="button"
-                className="map-empty-hint-btn"
-                onClick={() => setMapLayer("all")}
-              >
-                Показать все публичные
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-
-        {!loading &&
-        !showHeatmap &&
         placemarks.length > 0 &&
         hasActiveFilters &&
         filteredPlacemarks.length === 0 ? (
