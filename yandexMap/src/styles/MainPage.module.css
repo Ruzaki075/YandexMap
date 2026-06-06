@@ -1115,21 +1115,14 @@
   }
 
   .mapInner :global(.map-tools) {
-    top: 52px;
+    top: 8px;
     bottom: auto;
-    left: 8px;
+    left: auto;
     right: 8px;
+    max-width: none;
+    align-items: flex-end;
   }
 
-  .mapFab {
-    bottom: calc(76px + env(safe-area-inset-bottom, 0));
-    right: 14px;
-    width: 50px;
-    height: 50px;
-    display: none;
-  }
-
-  /* Компактная статистика поверх карты */
   .mobileStatsChips {
     display: flex;
     flex-wrap: wrap;
@@ -1137,9 +1130,14 @@
     position: absolute;
     top: 8px;
     left: 8px;
-    right: 8px;
+    right: 72px;
     z-index: 7;
     pointer-events: none;
+    min-height: 28px;
+  }
+
+  .mapFab {
+    display: none;
   }
 
   .mobileStatChip {

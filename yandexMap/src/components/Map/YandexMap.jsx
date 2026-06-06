@@ -1431,7 +1431,7 @@ const YandexMap = () => {
         </YMaps>
         </div>
 
-        <div className="map-tools" role="toolbar" aria-label="Инструменты карты">
+        <div className="map-tools map-tools--compact" role="toolbar" aria-label="Инструменты карты">
           <div className="map-tools-bar">
             <button
               type="button"
@@ -1445,36 +1445,46 @@ const YandexMap = () => {
             <span className="map-tools-divider" aria-hidden="true" />
             <button
               type="button"
-              className={`map-tool-btn${mapLegendOpen ? " is-active" : ""}`}
+              className={`map-tool-btn map-tool-btn--icon${mapLegendOpen ? " is-active" : ""}`}
               title="Информация о карте"
               aria-expanded={mapLegendOpen}
               aria-controls="map-info-panel"
               onClick={() => setMapLegendOpen((v) => !v)}
             >
               <IconAlertCircle size={16} className="map-tool-btn__icon" />
-              <span>Информация</span>
+              <span className="map-tool-btn__label">Информация</span>
             </button>
-            {user ? (
-              <button
-                type="button"
-                className={`map-tool-btn${mapMineOnly ? " is-active" : ""}`}
-                title="Только мои обращения"
-                aria-pressed={mapMineOnly}
-                onClick={() => setMapMineOnly((v) => !v)}
-              >
-                <IconUser size={16} className="map-tool-btn__icon" />
-                <span>Мои</span>
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className={`map-tool-btn map-tool-btn--icon map-tool-btn--mine${
+                mapMineOnly ? " is-active" : ""
+              }${user ? "" : " map-tool-btn--mine-hidden"}`}
+              title="Только мои обращения"
+              aria-label="Только мои обращения"
+              aria-pressed={user ? mapMineOnly : undefined}
+              tabIndex={user ? 0 : -1}
+              disabled={!user}
+              onClick={() => user && setMapMineOnly((v) => !v)}
+            >
+              <IconUser size={16} className="map-tool-btn__icon" />
+              <span className="map-tool-btn__label">Мои</span>
+            </button>
           </div>
 
         {mapLegendOpen ? (
-          <div
-            id="map-info-panel"
-            className="map-legend-panel"
-            role="region"
-            aria-label="Информация о карте"
-          >
+          <>
+            <button
+              type="button"
+              className="map-legend-backdrop"
+              aria-label="Закрыть информацию"
+              onClick={() => setMapLegendOpen(false)}
+            />
+            <div
+              id="map-info-panel"
+              className="map-legend-panel"
+              role="region"
+              aria-label="Информация о карте"
+            >
             <div className="map-legend-panel__head">
               <span className="map-legend-panel__title">Информация</span>
               <button
@@ -1519,6 +1529,7 @@ const YandexMap = () => {
               ))}
             </ul>
           </div>
+          </>
         ) : null}
         </div>
 

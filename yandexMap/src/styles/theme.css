@@ -452,8 +452,8 @@ a.kp-link:hover,
 }
 
 @media (max-width: 768px) {
-  body:has(.app-main--map) {
-    padding-bottom: 0;
+  body:has(.bottom-nav) {
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0));
   }
 
   .app-main {

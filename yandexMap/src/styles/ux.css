@@ -376,11 +376,6 @@ a.add-first-btn,
     min-height: 44px;
   }
 
-  .onboard-panel {
-    max-height: min(90dvh, 520px);
-    overflow-y: auto;
-  }
-
   .auth-page--karta .auth-box {
     padding: 28px 20px 24px;
     margin: 0 12px;
