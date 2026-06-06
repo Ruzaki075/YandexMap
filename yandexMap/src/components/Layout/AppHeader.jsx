@@ -65,7 +65,9 @@ export default function AppHeader() {
   return (
     <>
       <header
-        className={`${styles.header}${!isMap ? ` ${styles.headerCompactMobile}` : ""}`}
+        className={`${styles.header}${isMap ? ` ${styles.headerMap}` : ""}${
+          !isMap ? ` ${styles.headerCompactMobile}` : ""
+        }`}
       >
         <KpLogo to="/" className={styles.logo} />
 

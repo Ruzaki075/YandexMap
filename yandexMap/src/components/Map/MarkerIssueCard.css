@@ -267,3 +267,38 @@
   font-size: 0.72rem;
   padding: 0.25rem 0.5rem;
 }
+
+@media (max-width: 768px) {
+  .ag-issue-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .ag-issue-street {
+    font-size: 1rem;
+  }
+
+  .ag-issue-head .modal-actions-bar__buttons {
+    justify-content: flex-start;
+  }
+
+  .ag-issue-like-btn {
+    min-height: 44px;
+  }
+
+  .ag-issue-details-toggle {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .ag-issue-photo {
+    max-height: min(32vh, 240px);
+  }
+
+  .ag-issue-photo-wrap .before-after-slider {
+    height: min(32vh, 240px);
+    max-height: min(32vh, 240px);
+  }
+}

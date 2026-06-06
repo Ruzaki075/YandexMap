@@ -171,6 +171,64 @@
 
 /* На внутренних страницах навигация — в BottomNav */
 @media (max-width: 768px) {
+  .header {
+    height: calc(56px + env(safe-area-inset-top, 0));
+    padding-top: env(safe-area-inset-top, 0);
+    padding-left: max(0.65rem, env(safe-area-inset-left, 0));
+    padding-right: max(0.65rem, env(safe-area-inset-right, 0));
+    gap: 0.35rem;
+  }
+
+  .headerMap {
+    height: calc(52px + env(safe-area-inset-top, 0));
+  }
+
+  .headerMap .logo :global(.kp-logo-line1) {
+    display: none;
+  }
+
+  .headerMap .logo :global(.kp-logo-line2) {
+    font-size: 15px;
+    letter-spacing: 0.5px;
+  }
+
+  .headerMap .logo :global(.kp-logo-bar) {
+    height: 22px;
+  }
+
+  .headerMap .headerActions {
+    gap: 0.2rem;
+  }
+
+  .headerMap .headerIconBtn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .headerMap .headerAvatar {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.72rem;
+  }
+
+  .headerMap .headerLogin {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .headerMap .burger {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .headerCompactMobile .logo :global(.kp-logo-line1) {
+    display: none;
+  }
+
+  .headerCompactMobile .logo :global(.kp-logo-line2) {
+    font-size: 16px;
+  }
+
   .headerCompactMobile .burger {
     display: none !important;
   }
@@ -178,5 +236,17 @@
   .headerCompactMobile + nav,
   .headerCompactMobile ~ nav {
     display: none !important;
+  }
+
+  .mobileNavOpen {
+    top: calc(56px + env(safe-area-inset-top, 0));
+    max-height: calc(100dvh - 56px - env(safe-area-inset-top, 0));
+    overflow-y: auto;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0));
+  }
+
+  .headerMap ~ .mobileNavOpen {
+    top: calc(52px + env(safe-area-inset-top, 0));
+    max-height: calc(100dvh - 52px - env(safe-area-inset-top, 0));
   }
 }

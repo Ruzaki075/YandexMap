@@ -139,12 +139,37 @@
   border: 1px solid #cc0000;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 768px) {
   .marker-detail-overlay {
-    padding: 12px;
+    padding: 0;
+    align-items: flex-end;
   }
 
   .marker-detail-modal {
-    max-height: 92vh;
+    width: 100%;
+    max-width: none;
+    max-height: min(92dvh, calc(100dvh - env(safe-area-inset-top, 0)));
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+    animation: markerDetailSlideIn 0.28s ease;
+  }
+
+  .marker-detail-close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .marker-detail-scroll {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+  }
+
+  .marker-detail-footer {
+    padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0));
+  }
+}
+
+@media (max-width: 560px) {
+  .marker-detail-modal {
+    max-height: min(94dvh, calc(100dvh - env(safe-area-inset-top, 0)));
   }
 }

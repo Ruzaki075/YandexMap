@@ -87,4 +87,8 @@
   .app-toast {
     bottom: calc(5.25rem + env(safe-area-inset-bottom, 0) + 8px);
   }
+
+  body:has(.app-main--map) .app-toast {
+    bottom: calc(16px + env(safe-area-inset-bottom, 0));
+  }
 }

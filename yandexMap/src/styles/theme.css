@@ -452,12 +452,18 @@ a.kp-link:hover,
 }
 
 @media (max-width: 768px) {
+  body:has(.app-main--map) {
+    padding-bottom: 0;
+  }
+
   .app-main {
     padding-top: calc(56px + env(safe-area-inset-top, 0));
   }
 
   .app-main--map {
-    padding-top: calc(56px + env(safe-area-inset-top, 0));
+    padding-top: calc(52px + env(safe-area-inset-top, 0));
+    height: 100dvh;
+    min-height: 100dvh;
   }
 
   .kp-logo-line1 {
